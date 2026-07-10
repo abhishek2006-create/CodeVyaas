@@ -10,8 +10,11 @@ import { useClerk } from "@clerk/nextjs";
 import { EditorPanelSkeleton } from "./EditorPanelSkeleton";
 import useMounted from "@/hooks/useMounted";
 import ShareSnippetDialog from "./ShareSnippetDialog";
+import EditorSettings from "@/components/settings/EditorSettings";
+import { useMonaco } from "@monaco-editor/react";
 
 function EditorPanel() {
+  const monaco = useMonaco();
   const clerk = useClerk();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
   const { language, theme, fontSize, editor, setFontSize, setEditor } = useCodeEditorStore();
@@ -45,26 +48,43 @@ function EditorPanel() {
     localStorage.setItem("editor-font-size", size.toString());
   };
 
+  useEffect(() => {
+    if (editor) {
+      editor.updateOptions({ fontSize });
+    }
+  }, [fontSize, editor]);
+
+  useEffect(() => {
+    if (!monaco) return;
+
+    defineMonacoThemes(monaco);
+
+    monaco.editor.setTheme(theme);
+
+  }, [monaco, theme]);
+
   if (!mounted) return null;
 
   return (
-    <div className="relative">
-      <div className="relative bg-[#12121a]/90 backdrop-blur rounded-xl border border-white/[0.05] p-6">
+    <div className="relative group">
+      <div className="relative glass-panel rounded-xl p-6 transition-all duration-300">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-[#1e1e2e] ring-1 ring-white/5">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 ring-1 ring-border">
               <Image src={"/" + language + ".png"} alt="Logo" width={24} height={24} />
             </div>
             <div>
-              <h2 className="text-sm font-medium text-white">Code Editor</h2>
-              <p className="text-xs text-gray-500">Write and execute your code</p>
+              <h2 className="text-sm font-medium text-foreground">Code Editor</h2>
+              <p className="text-xs text-muted-foreground">Write and execute your code</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <EditorSettings />
+
             {/* Font Size Slider */}
-            <div className="flex items-center gap-3 px-3 py-2 bg-[#1e1e2e] rounded-lg ring-1 ring-white/5">
-              <TypeIcon className="size-4 text-gray-400" />
+            <div className="flex items-center gap-3 px-3 py-2 bg-muted/20 rounded-lg ring-1 ring-border">
+              <TypeIcon className="size-4 text-muted-foreground" />
               <div className="flex items-center gap-3">
                 <input
                   type="range"
@@ -72,9 +92,9 @@ function EditorPanel() {
                   max="24"
                   value={fontSize}
                   onChange={(e) => handleFontSizeChange(parseInt(e.target.value))}
-                  className="w-20 h-1 bg-gray-600 rounded-lg cursor-pointer"
+                  className="w-20 h-1 bg-muted rounded-lg cursor-pointer accent-primary"
                 />
-                <span className="text-sm font-medium text-gray-400 min-w-[2rem] text-center">
+                <span className="text-sm font-medium text-muted-foreground min-w-[2rem] text-center">
                   {fontSize}
                 </span>
               </div>
@@ -84,10 +104,10 @@ function EditorPanel() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleRefresh}
-              className="p-2 bg-[#1e1e2e] hover:bg-[#2a2a3a] rounded-lg ring-1 ring-white/5 transition-colors"
+              className="p-2 bg-muted/20 hover:bg-muted/40 rounded-lg ring-1 ring-border transition-colors"
               aria-label="Reset to default code"
             >
-              <RotateCcwIcon className="size-4 text-gray-400" />
+              <RotateCcwIcon className="size-4 text-muted-foreground" />
             </motion.button>
 
             {/* Share Button */}
@@ -95,17 +115,19 @@ function EditorPanel() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsShareDialogOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg overflow-hidden bg-gradient-to-r
-               from-blue-500 to-blue-600 opacity-90 hover:opacity-100 transition-opacity"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-all"
             >
-              <ShareIcon className="size-4 text-white" />
-              <span className="text-sm font-medium text-white ">Share</span>
+              <ShareIcon className="size-4 text-primary-foreground" />
+              <span className="text-sm font-medium text-primary-foreground ">Share</span>
             </motion.button>
           </div>
         </div>
 
         {/* Editor  */}
-        <div className="relative group rounded-xl overflow-hidden ring-1 ring-white/[0.05]">
+        <div
+          className="relative group rounded-xl overflow-hidden ring-1 ring-border"
+          style={{ backgroundColor: "var(--editor-background)" }}
+        >
           {clerk.loaded && (
             <Editor
               height="600px"

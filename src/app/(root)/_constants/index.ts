@@ -1,5 +1,5 @@
 import { Monaco } from "@monaco-editor/react";
-import { Theme } from "../../../types";
+import { CodeTheme } from "../../../types";
 
 type LanguageConfig = Record<
   string,
@@ -336,7 +336,7 @@ print("Sum of numbers: \\(sum)")`,
   },
 };
 
-export const THEMES: Theme[] = [
+export const CODE_THEMES: CodeTheme[] = [
   { id: "vs-dark", label: "VS Dark", color: "#1e1e1e" },
   { id: "vs-light", label: "VS Light", color: "#ffffff" },
   { id: "github-dark", label: "GitHub Dark", color: "#0d1117" },
@@ -421,15 +421,74 @@ export const THEME_DEFINITONS = {
 
 // Helper function to define themes in Monaco
 export const defineMonacoThemes = (monaco: Monaco) => {
+  const root = getComputedStyle(document.documentElement);
+
+  const css = (name: string) =>
+      root.getPropertyValue(name).trim().replace("#", "");
+
+  monaco.editor.defineTheme("codevyaas", {
+    base: "vs-dark",
+    inherit: true,
+
+    rules: [
+      {
+        token: "comment",
+        foreground: css("--editor-comment"),
+      },
+      {
+        token: "string",
+        foreground: css("--editor-string"),
+      },
+      {
+        token: "keyword",
+        foreground: css("--editor-keyword"),
+      },
+      {
+        token: "number",
+        foreground: css("--editor-number"),
+      },
+      {
+        token: "type",
+        foreground: css("--editor-type"),
+      },
+      {
+        token: "class",
+        foreground: css("--editor-class"),
+      },
+      {
+        token: "function",
+        foreground: css("--editor-function"),
+      },
+      {
+        token: "variable",
+        foreground: css("--editor-variable"),
+      },
+      {
+        token: "operator",
+        foreground: css("--editor-operator"),
+      },
+    ],
+
+    colors: {
+      "editor.background": css("--editor-background"),
+      "editor.foreground": css("--editor-foreground"),
+      "editor.lineHighlightBackground": css("--editor-line-highlight"),
+      "editorLineNumber.foreground": css("--editor-line-number"),
+      "editorLineNumber.activeForeground": css("--editor-line-number-active"),
+      "editor.selectionBackground": css("--editor-selection"),
+      "editor.inactiveSelectionBackground": css("--editor-selection"),
+    },
+  });
+
+
   Object.entries(THEME_DEFINITONS).forEach(([themeName, themeData]) => {
     monaco.editor.defineTheme(themeName, {
       base: themeData.base,
       inherit: themeData.inherit,
-      rules: themeData.rules.map((rule) => ({
-        ...rule,
-        foreground: rule.foreground,
-      })),
+      rules: themeData.rules,
       colors: themeData.colors,
     });
   });
 };
+
+

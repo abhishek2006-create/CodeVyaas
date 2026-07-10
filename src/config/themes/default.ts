@@ -1,0 +1,91 @@
+import { ThemeDefinition } from "./types";
+
+export const defaultTheme: ThemeDefinition = {
+  id: "default",
+  label: "Default",
+  color: "#434129",
+  light: {
+    "--background": "oklch(0.97 0.014 254)", // Soft blue-tinted white
+    "--foreground": "oklch(0.25 0.02 254)", // Deep blue-gray for readability
+    "--card": "oklch(1 0 0)", // Pure white for cards to pop
+    "--card-foreground": "oklch(0.25 0.02 254)",
+    "--popover": "oklch(1 0 0)",
+    "--popover-foreground": "oklch(0.25 0.02 254)",
+    "--primary": "oklch(0.55 0.18 254)", // Vibrant blue
+    "--primary-foreground": "oklch(0.99 0.01 254)",
+    "--secondary": "oklch(0.92 0.04 254)", // Light blue tint
+    "--content-color": "oklch(0.92 0.04 254)",
+    "--secondary-foreground": "oklch(0.35 0.1 254)",
+    "--muted": "oklch(0.95 0.02 254)",
+    "--muted-foreground": "oklch(0.5 0.05 254)",
+    "--accent": "oklch(0.92 0.06 254)",
+    "--accent-foreground": "oklch(0.25 0.02 254)",
+    "--destructive": "oklch(0.6 0.18 20)",
+    "--destructive-foreground": "oklch(0.99 0.01 20)",
+    "--border": "oklch(0.88 0.03 254)",
+    "--input": "oklch(0.88 0.03 254)",
+    "--ring": "oklch(0.55 0.18 254)",
+    "--glass-background": "rgba(255, 255, 255, 0.7)",
+    "--glass-border": "rgba(0, 0, 0, 0.08)",
+
+    // Editor Light
+    "--editor-background": "oklch(0.99 0.005 254)",
+    "--editor-foreground": "oklch(0.25 0.02 254)",
+    "--editor-line-number": "oklch(0.7 0.02 254)",
+    "--editor-line-number-active": "oklch(0.25 0.02 254)",
+    "--editor-line-highlight": "oklch(0.95 0.02 254)",
+    "--editor-selection": "oklch(0.9 0.05 254)",
+    "--editor-comment": "oklch(0.6 0.02 254)",
+    "--editor-keyword": "oklch(0.55 0.18 254)",
+    "--editor-string": "oklch(0.5 0.15 150)",
+    "--editor-number": "oklch(0.6 0.15 30)",
+    "--editor-function": "oklch(0.5 0.15 280)",
+    "--editor-variable": "oklch(0.4 0.1 254)",
+    "--editor-operator": "oklch(0.55 0.18 254)",
+    "--editor-type": "oklch(0.6 0.15 320)",
+    "--editor-class": "oklch(0.6 0.15 320)",
+    "--editor-border": "oklch(0.88 0.03 254)",
+  },
+  dark: {
+    "--background": "oklch(0.14 0.02 254)", // Deep dark blue-gray
+    "--foreground": "oklch(0.95 0.01 254)",
+    "--card": "oklch(0.18 0.02 254)",
+    "--card-foreground": "oklch(0.95 0.01 254)",
+    "--popover": "oklch(0.18 0.02 254)",
+    "--popover-foreground": "oklch(0.95 0.01 254)",
+    "--primary": "oklch(0.7 0.15 254)", // Soft vibrant blue
+    "--primary-foreground": "oklch(0.14 0.02 254)",
+    "--secondary": "oklch(0.25 0.04 254)",
+    "--content-color": "oklch(0.25 0.04 254)",
+    "--secondary-foreground": "oklch(0.95 0.01 254)",
+    "--muted": "oklch(0.22 0.03 254)",
+    "--muted-foreground": "oklch(0.7 0.03 254)",
+    "--accent": "oklch(0.28 0.05 254)",
+    "--accent-foreground": "oklch(0.95 0.01 254)",
+    "--destructive": "oklch(0.5 0.2 20)",
+    "--destructive-foreground": "oklch(0.99 0.01 20)",
+    "--border": "oklch(0.25 0.03 254)",
+    "--input": "oklch(0.25 0.03 254)",
+    "--ring": "oklch(0.7 0.15 254)",
+    "--glass-background": "rgba(20, 20, 30, 0.6)",
+    "--glass-border": "rgba(255, 255, 255, 0.08)",
+
+    // Editor Dark
+    "--editor-background": "oklch(0.18 0.02 254)",
+    "--editor-foreground": "oklch(0.95 0.01 254)",
+    "--editor-line-number": "oklch(0.4 0.02 254)",
+    "--editor-line-number-active": "oklch(0.95 0.01 254)",
+    "--editor-line-highlight": "oklch(0.22 0.02 254)",
+    "--editor-selection": "oklch(0.3 0.1 254)",
+    "--editor-comment": "oklch(0.5 0.02 254)",
+    "--editor-keyword": "oklch(0.7 0.15 254)",
+    "--editor-string": "oklch(0.8 0.1 150)",
+    "--editor-number": "oklch(0.8 0.1 30)",
+    "--editor-function": "oklch(0.75 0.1 280)",
+    "--editor-variable": "oklch(0.95 0.01 254)",
+    "--editor-operator": "oklch(0.7 0.15 254)",
+    "--editor-type": "oklch(0.8 0.1 320)",
+    "--editor-class": "oklch(0.8 0.1 320)",
+    "--editor-border": "oklch(0.25 0.03 254)",
+  },
+};

@@ -8,9 +8,9 @@ export default function UpgradeButton() {
   return (
     <Link
       href={CHEKOUT_URL}
-      className="inline-flex items-center justify-center gap-2 px-8 py-4 text-white 
-        bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg 
-        hover:from-blue-600 hover:to-blue-700 transition-all"
+      className="inline-flex items-center justify-center gap-2 px-8 py-4 text-primary-foreground 
+        bg-gradient-to-r from-primary to-primary/80 rounded-lg 
+        hover:from-primary/90 hover:to-primary transition-all font-medium shadow-lg shadow-primary/20"
     >
       <Zap className="w-5 h-5" />
       Upgrade to Pro

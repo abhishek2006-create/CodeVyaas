@@ -5,7 +5,7 @@ function CommentContent({ content }: { content: string }) {
   const parts = content.split(/(```[\w-]*\n[\s\S]*?\n```)/g);
 
   return (
-    <div className="max-w-none text-white">
+    <div className="max-w-none text-foreground">
       {parts.map((part, index) => {
         if (part.startsWith("```")) {
           //           ```javascript

@@ -21,13 +21,13 @@ function SnippetDetailPage() {
   if (snippet === undefined) return <SnippetLoadingSkeleton />;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen">
       <NavigationHeader />
 
       <main className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
-          <div className="bg-[#121218] border border-[#ffffff0a] rounded-2xl p-6 sm:p-8 mb-6 backdrop-blur-xl">
+          <div className="glass-panel rounded-2xl p-6 sm:p-8 mb-6 transition-all duration-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
                 <div className="flex items-center justify-center size-12 rounded-xl bg-[#ffffff08] p-2.5">
@@ -38,19 +38,19 @@ function SnippetDetailPage() {
                   />
                 </div>
                 <div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-white mb-2">
+                  <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-2">
                     {snippet.title}
                   </h1>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-[#8b8b8d]">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <User className="w-4 h-4" />
                       <span>{snippet.userName}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[#8b8b8d]">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="w-4 h-4" />
                       <span>{new Date(snippet._creationTime).toLocaleDateString()}</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[#8b8b8d]">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <MessageSquare className="w-4 h-4" />
                       <span>{comments?.length} comments</span>
                     </div>
@@ -64,8 +64,8 @@ function SnippetDetailPage() {
           </div>
 
           {/* Code Editor */}
-          <div className="mb-8 rounded-2xl overflow-hidden border border-[#ffffff0a] bg-[#121218]">
-            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-[#ffffff0a]">
+          <div className="mb-8 rounded-2xl overflow-hidden glass-panel transition-all duration-300">
+            <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/5">
               <div className="flex items-center gap-2 text-[#808086]">
                 <Code className="w-4 h-4" />
                 <span className="text-sm font-medium">Source Code</span>
@@ -76,7 +76,7 @@ function SnippetDetailPage() {
               height="600px"
               language={LANGUAGE_CONFIG[snippet.language].monacoLanguage}
               value={snippet.code}
-              theme="vs-dark"
+              theme="codevyaas"
               beforeMount={defineMonacoThemes}
               options={{
                 minimap: { enabled: false },
