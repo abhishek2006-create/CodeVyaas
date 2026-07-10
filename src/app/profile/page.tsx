@@ -60,7 +60,7 @@ function ProfilePage() {
   if (!user && isLoaded) return router.push("/");
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen">
       <NavigationHeader />
 
       <div className="max-w-7xl mx-auto px-4 py-12">
@@ -74,8 +74,7 @@ function ProfilePage() {
 
         {/* Main content */}
         <div
-          className="bg-gradient-to-br from-[#12121a] to-[#1a1a2e] rounded-3xl shadow-2xl 
-        shadow-black/50 border border-gray-800/50 backdrop-blur-xl overflow-hidden"
+          className="glass-panel rounded-3xl overflow-hidden transition-all duration-300"
         >
           {/* Tabs */}
           <div className="border-b border-gray-800/50">
@@ -122,12 +121,12 @@ function ProfilePage() {
                   {executions?.map((execution) => (
                     <div
                       key={execution._id}
-                      className="group rounded-xl overflow-hidden transition-all duration-300 hover:border-blue-500/50 hover:shadow-md hover:shadow-blue-500/50"
+                      className="group rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-md hover:shadow-primary/50"
                     >
-                      <div className="flex items-center justify-between p-4 bg-black/30 border border-gray-800/50 rounded-t-xl">
+                      <div className="flex items-center justify-between p-4 glass-header border border-border rounded-t-xl">
                         <div className="flex items-center gap-4">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity" />
                             <Image
                               src={"/" + execution.language + ".png"}
                               alt=""
@@ -138,11 +137,11 @@ function ProfilePage() {
                           </div>
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-white">
+                              <span className="text-sm font-medium text-foreground">
                                 {execution.language.toUpperCase()}
                               </span>
-                              <span className="text-xs text-gray-400">•</span>
-                              <span className="text-xs text-gray-400">
+                              <span className="text-xs text-muted-foreground">•</span>
+                              <span className="text-xs text-muted-foreground">
                                 {new Date(execution._creationTime).toLocaleString()}
                               </span>
                             </div>
@@ -150,8 +149,8 @@ function ProfilePage() {
                               <span
                                 className={`text-xs px-2 py-0.5 rounded-full ${
                                   execution.error
-                                    ? "bg-red-500/10 text-red-400"
-                                    : "bg-green-500/10 text-green-400"
+                                    ? "bg-destructive/10 text-destructive"
+                                    : "bg-green-500/10 text-green-500"
                                 }`}
                               >
                                 {execution.error ? "Error" : "Success"}
@@ -161,15 +160,15 @@ function ProfilePage() {
                         </div>
                       </div>
 
-                      <div className="p-4 bg-black/20 rounded-b-xl border border-t-0 border-gray-800/50">
+                      <div className="p-4 glass-panel rounded-b-xl border border-t-0 border-border">
                         <CodeBlock code={execution.code} language={execution.language} />
 
                         {(execution.output || execution.error) && (
-                          <div className="mt-4 p-4 rounded-lg bg-black/40">
-                            <h4 className="text-sm font-medium text-gray-400 mb-2">Output</h4>
+                          <div className="mt-4 p-4 rounded-lg bg-muted/30">
+                            <h4 className="text-sm font-medium text-muted-foreground mb-2">Output</h4>
                             <pre
                               className={`text-sm ${
-                                execution.error ? "text-red-400" : "text-green-400"
+                                execution.error ? "text-destructive" : "text-green-500"
                               }`}
                             >
                               {execution.error || execution.output}
@@ -182,19 +181,19 @@ function ProfilePage() {
 
                   {isLoadingExecutions ? (
                     <div className="text-center py-12">
-                      <Loader2 className="w-12 h-12 text-gray-600 mx-auto mb-4 animate-spin" />
-                      <h3 className="text-lg font-medium text-gray-400 mb-2">
+                      <Loader2 className="w-12 h-12 text-muted-foreground mx-auto mb-4 animate-spin" />
+                      <h3 className="text-lg font-medium text-muted-foreground mb-2">
                         Loading code executions...
                       </h3>
                     </div>
                   ) : (
                     executions.length === 0 && (
                       <div className="text-center py-12">
-                        <Code className="w-12 h-12 text-gray-600 mx-auto mb-4" />
-                        <h3 className="text-lg font-medium text-gray-400 mb-2">
+                        <Code className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                        <h3 className="text-lg font-medium text-muted-foreground mb-2">
                           No code executions yet
                         </h3>
-                        <p className="text-gray-500">Start coding to see your execution history!</p>
+                        <p className="text-muted-foreground">Start coding to see your execution history!</p>
                       </div>
                     )
                   )}
@@ -204,7 +203,7 @@ function ProfilePage() {
                     <div className="flex justify-center mt-8">
                       <button
                         onClick={handleLoadMore}
-                        className="px-6 py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg flex items-center gap-2 
+                        className="px-6 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg flex items-center gap-2 
                         transition-colors"
                       >
                         Load More
@@ -222,7 +221,7 @@ function ProfilePage() {
                     <div key={snippet._id} className="group relative">
                       <Link href={`/snippets/${snippet._id}`}>
                         <div
-                          className="bg-black/20 rounded-xl border border-gray-800/50 hover:border-gray-700/50 
+                          className="glass-card rounded-xl border border-border hover:border-primary/50 
                           transition-all duration-300 overflow-hidden h-full group-hover:transform
                         group-hover:scale-[1.02]"
                         >
@@ -230,7 +229,7 @@ function ProfilePage() {
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-3">
                                 <div className="relative">
-                                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity" />
+                                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-20" />
                                   <Image
                                     src={`/${snippet.language}.png`}
                                     alt={`${snippet.language} logo`}
@@ -239,7 +238,7 @@ function ProfilePage() {
                                     height={40}
                                   />
                                 </div>
-                                <span className="px-3 py-1 bg-blue-500/10 text-blue-400 rounded-lg text-sm">
+                                <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm">
                                   {snippet.language}
                                 </span>
                               </div>
@@ -250,10 +249,10 @@ function ProfilePage() {
                                 <StarButton snippetId={snippet._id} />
                               </div>
                             </div>
-                            <h2 className="text-xl font-semibold text-white mb-3 line-clamp-1 group-hover:text-blue-400 transition-colors">
+                            <h2 className="text-xl font-semibold text-foreground mb-3 line-clamp-1 group-hover:text-primary transition-colors">
                               {snippet.title}
                             </h2>
-                            <div className="flex items-center justify-between text-sm text-gray-400">
+                            <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <div className="flex items-center gap-2">
                                 <Clock className="w-4 h-4" />
                                 <span>{new Date(snippet._creationTime).toLocaleDateString()}</span>
@@ -262,8 +261,8 @@ function ProfilePage() {
                             </div>
                           </div>
                           <div className="px-6 pb-6">
-                            <div className="bg-black/30 rounded-lg p-4 overflow-hidden">
-                              <pre className="text-sm text-gray-300 font-mono line-clamp-3">
+                            <div className="bg-muted/30 rounded-lg p-4 overflow-hidden">
+                              <pre className="text-sm text-muted-foreground font-mono line-clamp-3">
                                 {snippet.code}
                               </pre>
                             </div>

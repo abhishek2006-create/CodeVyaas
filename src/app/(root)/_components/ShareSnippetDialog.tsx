@@ -31,18 +31,18 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-[#1e1e2e] rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="glass-panel rounded-xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-white">Share Snippet</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-300">
+          <h2 className="text-xl font-semibold text-foreground">Share Snippet</h2>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleShare}>
           <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium text-gray-400 mb-2">
+            <label htmlFor="title" className="block text-sm font-medium text-muted-foreground mb-2">
               Title
             </label>
             <input
@@ -50,7 +50,7 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-[#181825] border border-[#313244] rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="glass-input w-full px-3 py-2 rounded-lg text-foreground placeholder:text-muted-foreground/50"
               placeholder="Enter snippet title"
               required
             />
@@ -60,15 +60,15 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-400 hover:text-gray-300"
+              className="px-4 py-2 text-muted-foreground hover:text-foreground transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSharing}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 
-              disabled:opacity-50"
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 
+              disabled:opacity-50 transition-all font-medium"
             >
               {isSharing ? "Sharing..." : "Share"}
             </button>
