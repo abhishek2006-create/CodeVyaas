@@ -181,6 +181,7 @@ These scientific articles cite Judge0.
 * [Learn With Cresvia: AI Powered Gamified learning and Coding Platform for Engineering Students](https://www.ijraset.com/best-journal/learnwithcresvia-ai-powered-gamified-learning-and-coding-platform-for-engineering-students)
 * [MAGECODE: Machine-Generated Code Detection Method Using Large Language Models](https://ieeexplore.ieee.org/abstract/document/10772217)
 * [Modul za obavljanje korisnički definiranih programa u sustavu za automatsko ocjenjivanje programskog kôda Edgar](https://repozitorij.fer.unizg.hr/en/islandora/object/fer%3A12816)
+* [My Code Weapon: Adaptive Problem Recommendation and Knowledge Retention Scheduling in AI-assisted Programming Education](https://dl.acm.org/doi/epdf/10.1145/3774398.3811573)
 * [Nacionalni repozitorij završnih i diplomskih radova ZIR](https://zir.nsk.hr/islandora/search/dabar_search_keywords_mt:(%22Judge0%22))
 * [NEOLEARN: AI – DRIVEN SYSTEM FOR STUDENT ASSESSMENT AND ADAPTIVE LEARNING](https://www.irjmets.com/upload_newfiles/irjmets71200034667/paper_file/irjmets71200034667.pdf)
 * [Online Automatic Assessment System for Program Code: Architecture and Experiences](https://www.researchgate.net/publication/353329318_Online_Automatic_Assessment_System_for_Program_Code_Architecture_and_Experiences)

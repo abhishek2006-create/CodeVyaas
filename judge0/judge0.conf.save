@@ -197,11 +197,11 @@ REDIS_HOST=redis
 
 # Specify Redis port.
 # Default: 6379
-REDIS_PORT=6379
+REDIS_PORT=
 
 # Specify Redis password. Cannot be blank.
 # Default: NO DEFAULT! MUST BE SET!
-REDIS_PASSWORD=judge0redis
+REDIS_PASSWORD=
 
 # Specify Resque namespace.
 # Default: Resque's default namespace
@@ -219,7 +219,7 @@ POSTGRES_HOST=db
 
 # Specify Postgres port.
 # Default: 5432
-POSTGRES_PORT=5432
+POSTGRES_PORT=
 
 # Name of the database to use. Used only in production.
 # Default: postgres
@@ -231,7 +231,7 @@ POSTGRES_USER=judge0
 
 # Password of the user. Cannot be blank. Used only in production.
 # Default: NO DEFAULT, YOU MUST SET YOUR PASSWORD
-POSTGRES_PASSWORD=judge0
+POSTGRES_PASSWORD=
 
 
 ################################################################################
@@ -366,4 +366,4 @@ RAILS_SERVER_PROCESSES=
 
 # Secret key base for production, if not set it will be randomly generated
 # Default: randomly generated
-SECRET_KEY_BASE=
+SECRET_KEY_B
