@@ -30,13 +30,14 @@ CodeVyaas is a modern, full-stack online code execution platform that enables us
 
 ## Code execution
 
+
+* install doker desktop and linux
+  
 Create `.env.local` in the project root:
 ```env
 JUDGE_API_URL=http://localhost:xxxx
 ```
 
-* install doker desktop and linux
-  
   Open a second terminal:
 
 ```powershell
