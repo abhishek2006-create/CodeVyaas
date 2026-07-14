@@ -34,7 +34,7 @@ http.route({
         });
 
         if (success) {
-          // optionally do anything here
+          // will do something here
         }
       }
 
