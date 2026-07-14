@@ -71,77 +71,76 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       });
     },
 
-    runCode: async () => {
-      const { language, getCode } = get();
-      const code = getCode();
+  runCode: async () => {
+  const { language, getCode } = get();
+  const code = getCode();
 
-      if (!code) {
-        set({ error: "Please enter some code" });
-        return;
-      }
+  if (!code.trim()) {
+    set({ error: "Please enter some code" });
+    return;
+  }
 
-      set({ isRunning: true, error: null, output: "" });
+  set({ isRunning: true, error: null, output: "" });
 
-      try {
-        const response = await fetch("/api/execute", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ language, code }),
-        });
+  try {
+    const judgeApiUrl =
+      process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
 
-        const data = await response.json();
+    const response = await fetch(`${judgeApiUrl}/api/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        language,
+        source: code, // Docker Judge API expects `source`, not `code`
+        stdin: "", // Replace later with your editor's custom input state
+      }),
+    });
 
-        if (!response.ok) {
-          const error = data.error || data.message || "Failed to execute code";
-          set({ error, executionResult: { code, output: "", error } });
-          return;
-        }
+    const data = await response.json();
 
-        if (data.status?.description !== "Accepted") {
-          const error = [
-            data.compile_output,
-            data.stderr,
-            data.status?.description,
-            data.message,
-          ]
-            .filter(Boolean)
-            .join("\n");
+    if (!response.ok) {
+      const error = data.error || data.stderr || "Failed to execute code";
 
-          set({
-            error: error || "Code execution failed",
-            executionResult: {
-              code,
-              output: "",
-              error: error || "Code execution failed",
-            },
-          });
-          return;
-        }
+      set({
+        error,
+        executionResult: { code, output: "", error },
+      });
+      return;
+    }
 
-        const output = data.stdout ?? "";
+    const output = data.stdout ?? "";
+    const error =
+      data.timedOut
+        ? "Execution timed out"
+        : data.exitCode !== 0
+          ? data.stderr || "Code execution failed"
+          : null;
 
-        set({
-          output: output.trim(),
-          error: null,
-          executionResult: {
-            code,
-            output: output.trim(),
-            error: null,
-          },
-        });
-      } catch (error) {
-        console.log("Error running code:", error);
-        const errorMessage = error instanceof Error ? error.message : "Error running code";
-        set({
-          error: errorMessage,
-          executionResult: { code, output: "", error: errorMessage },
-        });
-      } finally {
-        set({ isRunning: false });
-      }
-    },
+    set({
+      output: output.trim(),
+      error,
+      executionResult: {
+        code,
+        output: output.trim(),
+        error,
+      },
+    });
+  } catch (error) {
+    console.error("Error running code:", error);
+
+    const errorMessage =
+      error instanceof Error ? error.message : "Error running code";
+
+    set({
+      error: errorMessage,
+      executionResult: { code, output: "", error: errorMessage },
+    });
+  } finally {
+    set({ isRunning: false });
+  }
+},
   };
 });
 

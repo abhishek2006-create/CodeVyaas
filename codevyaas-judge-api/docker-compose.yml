@@ -1,0 +1,40 @@
+services:
+  runner-python:
+    build: ./runners/python
+    image: codevyaas-runner-python:1.0
+
+  runner-javascript:
+    build: ./runners/javascript
+    image: codevyaas-runner-javascript:1.0
+
+  runner-cpp:
+    build: ./runners/cpp
+    image: codevyaas-runner-cpp:1.0
+
+  runner-java:
+    build: ./runners/java
+    image: codevyaas-runner-java:1.0
+
+  runner-typescript:
+    build: ./runners/typescript
+    image: codevyaas-runner-typescript:1.0
+
+  runner-rust:
+    build: ./runners/rust
+    image: codevyaas-runner-rust:1.0
+
+  runner-go:
+    build: ./runners/go
+    image: codevyaas-runner-go:1.0
+
+  runner-csharp:
+    build: ./runners/csharp
+    image: codevyaas-runner-csharp:1.0
+
+  runner-ruby:
+    build: ./runners/ruby
+    image: codevyaas-runner-ruby:1.0
+
+  runner-swift:
+    build: ./runners/swift
+    image: codevyaas-runner-swift:1.0

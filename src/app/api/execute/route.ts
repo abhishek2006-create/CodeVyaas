@@ -1,19 +1,6 @@
 import { NextResponse } from "next/server";
-import judge0 from "@/lib/judge0";
 
-// Judge0 language IDs
-const LANGUAGE_CONFIG: Record<string, number> = {
-  javascript: 63,
-  typescript: 74,
-  python: 71,
-  java: 62,
-  go: 60,
-  rust: 73,
-  cpp: 54,
-  csharp: 51,
-  ruby: 72,
-  swift: 83,
-};
+const JUDGE_API_URL = process.env.JUDGE_API_URL ?? "http://localhost:3002";
 
 export async function POST(request: Request) {
   try {
@@ -21,63 +8,47 @@ export async function POST(request: Request) {
 
     const {
       language,
-      code,
+      source,
       stdin = "",
     }: {
       language?: string;
-      code?: string;
+      source?: string;
       stdin?: string;
     } = body;
 
-    if (!language || !code) {
+    if (!language || !source) {
       return NextResponse.json(
-        {
-          error: "Language and code are required.",
-        },
-        {
-          status: 400,
-        }
+        { error: "Language and source are required." },
+        { status: 400 }
       );
     }
 
-    const languageId = LANGUAGE_CONFIG[language.toLowerCase()];
-
-    if (!languageId) {
-      return NextResponse.json(
-        {
-          error: `Unsupported language: ${language}`,
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    const { data } = await judge0.post(
-      "/submissions?base64_encoded=false&wait=true",
-      {
-        source_code: code,
-        language_id: languageId,
+    const judgeResponse = await fetch(`${JUDGE_API_URL}/api/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        language: language.toLowerCase(),
+        source,
         stdin,
-      }
-    );
+      }),
+      cache: "no-store",
+    });
 
-    return NextResponse.json(data);
+    const data = await judgeResponse.json();
+
+    return NextResponse.json(data, {
+      status: judgeResponse.status,
+    });
   } catch (error) {
-    console.error("Judge0 Error:", error);
-
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Internal Server Error";
+    console.error("Judge API Error:", error);
 
     return NextResponse.json(
       {
-        error: message,
+        error: "Judge service is unavailable. Ensure codevyaas-judge-api is running.",
       },
-      {
-        status: 500,
-      }
+      { status: 502 }
     );
   }
 }
