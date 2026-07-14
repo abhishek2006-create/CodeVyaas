@@ -26,9 +26,14 @@ CodeVyaas is a modern, full-stack online code execution platform that enables us
 * wsl
 * clerk
 
-Create `.env.local` in the project root:
+
 
 ## Code execution
+
+Create `.env.local` in the project root:
+```env
+JUDGE_API_URL=http://localhost:xxxx
+```
 
 * install doker desktop and linux
   
