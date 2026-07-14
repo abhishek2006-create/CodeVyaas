@@ -26,4 +26,37 @@ CodeVyaas is a modern, full-stack online code execution platform that enables us
 * wsl
 * clerk
 
+Create `.env.local` in the project root:
+
+## Code execution
+
+* install doker desktop and linux
+  
+  Open a second terminal:
+
+```powershell
+cd codevyaas-judge-api
+docker compose build
+```
+It will take few minutes
+Verify runner images:
+
+```powershell
+docker images
+```
+In the `codevyaas-judge-api` folder:
+
+```powershell
+cmd /c npm install
+
+$env:PORT = "xxxx"
+cmd /c npm run start
+```
+
+Expected output:
+
+```text
+Judge API listening on port 3002
+```
+
 CodeVyaas is designed to provide students, developers, and coding enthusiasts with a seamless environment to practice, test, and execute code from anywhere.
