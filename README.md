@@ -44,7 +44,7 @@ JUDGE_API_URL=http://localhost:xxxx
 cd codevyaas-judge-api
 docker compose build
 ```
-It will take few minutes
+It will take few minutes,
 Verify runner images:
 
 ```powershell
