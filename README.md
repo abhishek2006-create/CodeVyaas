@@ -61,7 +61,7 @@ cmd /c npm run start
 Expected output:
 
 ```text
-Judge API listening on port 3002
+Judge API listening on port xxxx
 ```
 
 CodeVyaas is designed to provide students, developers, and coding enthusiasts with a seamless environment to practice, test, and execute code from anywhere.
