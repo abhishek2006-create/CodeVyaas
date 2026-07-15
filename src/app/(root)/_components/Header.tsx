@@ -8,6 +8,7 @@ import NavbarSettings from "@/components/settings/NavbarSettings";
 import LanguageSelector from "./LanguageSelector";
 import RunButton from "./RunButton";
 import HeaderProfileBtn from "./HeaderProfileBtn";
+import ChatbotLauncher from "./ChatbotLauncher";
 
 async function Header() {
   let convexUser: { isPro?: boolean } | null = null;
@@ -99,7 +100,10 @@ async function Header() {
           )}
 
           <SignedIn>
-            <RunButton />
+            <div className="flex items-center gap-2">
+              <RunButton />
+              <ChatbotLauncher />
+            </div>
           </SignedIn>
 
           <div className="pl-3 border-l border-border">

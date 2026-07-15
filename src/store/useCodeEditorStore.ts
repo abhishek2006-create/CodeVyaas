@@ -10,6 +10,7 @@ const getInitialState = () => {
       language: "javascript",
       fontSize: 16,
       theme: "vs-dark",
+      
     };
   }
 

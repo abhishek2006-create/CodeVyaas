@@ -10,6 +10,8 @@ export const catppuccin: ThemeDefinition = {
   light: {
     "--background": "oklch(0.96 0.02 330)",
     "--foreground": "oklch(0.3 0.05 330)",
+    "--card": "oklch(0.99 0.01 330)",
+    "--card-foreground": "oklch(0.3 0.05 330)",
     "--primary": "oklch(0.5 0.20 330)",
     "--primary-foreground": "oklch(0.98 0.01 330)",
     "--secondary": "oklch(0.9 0.03 330)",
@@ -50,6 +52,8 @@ export const catppuccin: ThemeDefinition = {
   dark: {
     "--background": "oklch(0.2 0.04 330)",
     "--foreground": "oklch(0.9 0.03 330)",
+    "--card": "oklch(0.24 0.04 330)",
+    "--card-foreground": "oklch(0.9 0.03 330)",
     "--primary": "oklch(0.75 0.12 330)",
     "--primary-foreground": "oklch(0.2 0.04 330)",
     "--secondary": "oklch(0.55 0.15 330)",

@@ -14,7 +14,7 @@ export interface SettingsMenuSection {
   items: SettingsMenuItem[];
 }
 
-const WEBSITE_APPEARANCE_SECTION_BASE = {
+const WEBSITE_APPEARANCE_SECTION_BASE: SettingsMenuSection = {
   id: "website-appearance",
   label: "Website Appearance",
   items: [

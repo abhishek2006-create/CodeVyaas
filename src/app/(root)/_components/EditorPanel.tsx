@@ -14,6 +14,7 @@ import EditorSettings from "@/components/settings/EditorSettings";
 import { useMonaco } from "@monaco-editor/react";
 
 function EditorPanel() {
+  
   const monaco = useMonaco();
   const clerk = useClerk();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
