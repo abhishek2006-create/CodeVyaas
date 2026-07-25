@@ -31,15 +31,15 @@ export const FEATURES = {
     "Multi-language support",
   ],
   collaboration: [
-    "Real-time pair programming",
-    "Team workspaces",
-    "Version control integration",
-    "Code review tools",
+    // "Real-time pair programming",
+    // "Team workspaces",
+    // "Version control integration",
+    // "Code review tools",
   ],
   deployment: [
-    "One-click deployment",
-    "CI/CD integration",
-    "Container support",
-    "Custom domain mapping",
+    // "One-click deployment",
+    // "CI/CD integration",
+    // "Container support",
+    // "Custom domain mapping",
   ],
 };

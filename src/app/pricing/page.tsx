@@ -87,7 +87,7 @@ async function PricingPage() {
               <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-secondary/50 to-transparent" />
 
               <div className="relative p-8 md:p-12">
-                {/* header */}
+               
                 <div className="text-center mb-12">
                   <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 ring-1 ring-border mb-6">
                     <Star className="w-8 h-8 text-primary" />
@@ -96,14 +96,14 @@ async function PricingPage() {
                   <div className="flex items-baseline justify-center gap-2 mb-4">
                     <span className="text-2xl text-muted-foreground">$</span>
                     <span className="text-6xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 text-transparent bg-clip-text">
-                      39
+                      1.99
                     </span>
                     <span className="text-xl text-muted-foreground">one-time</span>
                   </div>
-                  <p className="text-muted-foreground text-lg">Unlock the full potential of CodeCraft</p>
+                  <p className="text-muted-foreground text-lg">Unlock the full potential of CodeVyaas</p>
                 </div>
 
-                {/* Features grid */}
+               
                 <div className="grid md:grid-cols-3 gap-12 mb-12">
                   <FeatureCategory label="Development">
                     {FEATURES.development.map((feature, idx) => (
@@ -124,7 +124,7 @@ async function PricingPage() {
                   </FeatureCategory>
                 </div>
 
-                {/* CTA */}
+                
                 <div className="flex justify-center">
                   <SignedIn>
                     <UpgradeButton />
