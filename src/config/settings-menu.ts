@@ -1,6 +1,6 @@
 export type SettingsScope = "navbar" | "editor";
 
-export type SettingsItemType = "website-theme" | "color-mode" | "editor-theme";
+export type SettingsItemType = "website-theme" | "color-mode" | "editor-theme" | "mode";
 
 export interface SettingsMenuItem {
   id: string;
@@ -16,7 +16,7 @@ export interface SettingsMenuSection {
 
 const WEBSITE_APPEARANCE_SECTION_BASE: SettingsMenuSection = {
   id: "website-appearance",
-  label: "Website Appearance",
+  label: "Settings Menu",
   items: [
     {
       id: "website-theme",
@@ -28,6 +28,11 @@ const WEBSITE_APPEARANCE_SECTION_BASE: SettingsMenuSection = {
       label: "Color Mode",
       type: "color-mode",
     },
+    {
+      id:"mode",
+      label: "Mode",
+      type:"mode",
+    }
   ],
 };
 

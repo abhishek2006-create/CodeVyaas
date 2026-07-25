@@ -70,7 +70,6 @@ export const catppuccin: ThemeDefinition = {
     "--ring": "oklch(0.75 0.12 330)",
     "--popover": "oklch(0.2 0.04 330)",
     "--popover-foreground": "oklch(0.9 0.03 330)",
-    "--card-foreground": "oklch(0.9 0.03 330)",
     "--glass-background": "rgba(30, 20, 30, 0.6)",
     "--glass-border": "rgba(255, 255, 255, 0.08)",
 
