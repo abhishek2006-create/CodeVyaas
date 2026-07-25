@@ -37,14 +37,29 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     editor: null,
     executionResult: null,
 
-    getCode: () => get().editor?.getValue() || "",
+  getCode: () => get().editor?.getValue() || "",
 
-    setEditor: (editor: Monaco) => {
-      const savedCode = localStorage.getItem(`editor-code-${get().language}`);
-      if (savedCode) editor.setValue(savedCode);
+setCode: (code: string) => {
+  const { editor, language } = get();
 
-      set({ editor });
-    },
+  if (typeof window !== "undefined") {
+    localStorage.setItem(`editor-code-${language}`, code);
+  }
+
+  if (editor && editor.getValue() !== code) {
+    editor.setValue(code);
+  }
+},
+
+setEditor: (editor: Monaco) => {
+  const savedCode = localStorage.getItem(`editor-code-${get().language}`);
+
+  if (savedCode) {
+    editor.setValue(savedCode);
+  }
+
+  set({ editor });
+},
 
     setTheme: (theme: string) => {
       localStorage.setItem("editor-theme", theme);

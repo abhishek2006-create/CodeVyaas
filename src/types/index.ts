@@ -45,19 +45,26 @@ export interface ExecutionResult {
 
 export interface CodeEditorState {
   language: string;
-  output: string;
-  isRunning: boolean;
-  error: string | null;
   theme: string;
   fontSize: number;
-  editor: Monaco | null;
-  executionResult: ExecutionResult | null;
+  output: string;
+  error: string | null;
+  isRunning: boolean;
 
-  setEditor: (editor: Monaco) => void;
+  editor: any;
+  executionResult: {
+    code: string;
+    output: string;
+    error: string | null;
+  } | null;
+
   getCode: () => string;
-  setLanguage: (language: string) => void;
+  setCode: (code: string) => void;
+
+  setEditor: (editor: any) => void;
   setTheme: (theme: string) => void;
   setFontSize: (fontSize: number) => void;
+  setLanguage: (language: string) => void;
   runCode: () => Promise<void>;
 }
 

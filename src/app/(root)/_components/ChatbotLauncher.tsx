@@ -20,14 +20,34 @@ import {
 
 type Position = { x: number; y: number };
 type Size = { w: number; h: number };
-type ChatMessage = { id: number; role: "assistant" | "user"; text: string };
+type DebugBug = {
+  line: number | null;
+  title: string;
+  reason: string;
+  fix: string;
+};
 
+type ChatMessage = {
+  id: string;
+  role: "assistant" | "user";
+  text: string;
+  errorType?: string | null;
+  bugs?: DebugBug[];
+  correctedCode?: string | null;
+};
+
+type ChatResponse = {
+  replyMarkdown: string;
+  errorType: string | null;
+  bugs: DebugBug[];
+  correctedCode: string | null;
+};
 const defaultSize: Size = { w: 380, h: 520 };
 const initialMessages: ChatMessage[] = [
   {
-    id: 1,
+    id: "welcome",
     role: "assistant",
-    text: "Hello 👋 I can help debug, explain code, or suggest improvements.",
+    text: "Hello 👋 I can read your editor code, output panel, and runtime errors. Ask me to debug your code or use Auto Fix.",
   },
 ];
 
@@ -40,6 +60,18 @@ function getDefaultPosition(size: Size): Position {
     y: Math.max(16, window.innerHeight - size.h - 24),
   };
 }
+
+const createMessageId = () =>
+  `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const createAssistantMessage = (data: ChatResponse): ChatMessage => ({
+  id: createMessageId(),
+  role: "assistant",
+  text: data.replyMarkdown || "No response received.",
+  errorType: data.errorType,
+  bugs: data.bugs || [],
+  correctedCode: data.correctedCode,
+});
 
 export default function ChatbotLauncher() {
   const [isOpen, setIsOpen] = useState(false);
@@ -57,9 +89,9 @@ export default function ChatbotLauncher() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
 
-  const { getCode, language, output, error } = useCodeEditorStore();
+  const { getCode, setCode, runCode } = useCodeEditorStore();
 
-  const code = getCode();
+  const [previousCode, setPreviousCode] = useState<string | null>(null);
 
   useEffect(() => {
     setPosition(getDefaultPosition(defaultSize));
@@ -165,49 +197,196 @@ export default function ChatbotLauncher() {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const askAssistant = async (
+    history: ChatMessage[],
+  ): Promise<ChatResponse> => {
+    const currentEditorState = useCodeEditorStore.getState();
+
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: history,
+        code: currentEditorState.getCode(),
+        output: currentEditorState.output,
+        error: currentEditorState.error,
+        language: currentEditorState.language,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Unable to contact the AI service.");
+    }
+
+    return data as ChatResponse;
+  };
+
+  const applyFix = (correctedCode: string) => {
+    const currentCode = getCode();
+
+    setPreviousCode(currentCode);
+    setCode(correctedCode);
+
+    setMessages((current) => [
+      ...current,
+      {
+        id: createMessageId(),
+        role: "assistant",
+        text: "✅ Applied the proposed fix to the editor. Run the code to verify it.",
+      },
+    ]);
+  };
+
+  const restorePreviousCode = () => {
+    if (!previousCode) return;
+
+    setCode(previousCode);
+
+    setMessages((current) => [
+      ...current,
+      {
+        id: createMessageId(),
+        role: "assistant",
+        text: "↩️ Restored the code that existed before the AI fix.",
+      },
+    ]);
+  };
+
   const sendMessage = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     const text = input.trim();
+
     if (!text || isLoading) return;
 
-    const userMessage = { id: Date.now(), role: "user" as const, text };
+    const userMessage: ChatMessage = {
+      id: createMessageId(),
+      role: "user",
+      text,
+    };
 
-    setMessages((current) => [...current, userMessage]);
+    const nextMessages = [...messages, userMessage];
+
+    setMessages(nextMessages);
     setInput("");
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMessage],
-          code,
-          output,
-          error,
-          language,
-        }),
-      });
+      const response = await askAssistant(nextMessages);
 
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error);
-
+      setMessages((current) => [...current, createAssistantMessage(response)]);
+    } catch {
       setMessages((current) => [
         ...current,
         {
-          id: Date.now() + 1,
+          id: createMessageId(),
           role: "assistant",
-          text: data.reply,
+          text: "I could not connect to Ollama. Check that Ollama is running and the model is installed.",
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const autoFixCurrentCode = async () => {
+    if (isLoading) return;
+
+    const originalCode = getCode();
+
+    if (!originalCode.trim()) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: createMessageId(),
+          role: "assistant",
+          text: "There is no code in the editor to debug.",
+        },
+      ]);
+      return;
+    }
+
+    setPreviousCode(originalCode);
+
+    const debugRequest: ChatMessage = {
+      id: createMessageId(),
+      role: "user",
+      text: "Debug the current workspace completely. Read the editor code, output panel, and error panel. Fix the current error and return the complete corrected code.",
+    };
+
+    let history = [...messages, debugRequest];
+
+    setMessages(history);
+    setIsLoading(true);
+
+    try {
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const response = await askAssistant(history);
+        const assistantMessage = createAssistantMessage(response);
+
+        history = [...history, assistantMessage];
+        setMessages(history);
+
+        if (!response.correctedCode?.trim()) {
+          break;
+        }
+
+        setCode(response.correctedCode);
+
+        // Execute corrected code through our Judge API.
+        await runCode();
+
+        const latestState = useCodeEditorStore.getState();
+
+        // shows latest error.
+        if (!latestState.error) {
+          const successMessage: ChatMessage = {
+            id: createMessageId(),
+            role: "assistant",
+            text: `✅ Fix applied and verification run completed successfully after attempt ${attempt}.`,
+          };
+
+          setMessages((current) => [...current, successMessage]);
+          return;
+        }
+
+        // Give the new runner error back to the AI.
+        const verificationMessage: ChatMessage = {
+          id: createMessageId(),
+          role: "user",
+          text: `The previous fix was applied and executed, but the code still failed.
+
+        Current error:
+        ${latestState.error}
+
+        Current output:
+        ${latestState.output}
+
+        Please continue debugging and provide a new full correctedCode.`,
+        };
+
+        history = [...history, verificationMessage];
+        setMessages(history);
+      }
+      setMessages((current) => [
+        ...current,
+        {
+          id: createMessageId(),
+          role: "assistant",
+          text: "I stopped automatic repair after three attempts. Review the latest suggested fix and error details before continuing.",
         },
       ]);
     } catch {
       setMessages((current) => [
         ...current,
         {
-          id: Date.now() + 1,
+          id: createMessageId(),
           role: "assistant",
-          text: "I could not connect to Ollama. Check that it is running.",
+          text: "Auto Fix could not complete because Ollama or the execution service was unavailable.",
         },
       ]);
     } finally {
@@ -242,7 +421,7 @@ export default function ChatbotLauncher() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 12 }}
             transition={{ duration: 0.18 }}
-            className="fixed z-[70] overflow-hidden rounded-2xl border border-white/10 bg-background/95 shadow-2xl backdrop-blur-xl"
+            className="fixed z-[70] overflow-hidden rounded-2xl border border-border bg-background shadow-2xl"
             style={{
               left: position.x,
               top: position.y,
@@ -252,16 +431,18 @@ export default function ChatbotLauncher() {
           >
             <div
               onPointerDown={startDrag}
-              className="flex cursor-grab items-center justify-between border-b border-border/60 bg-gradient-to-r from-primary/10 to-purple-500/10 px-4 py-3 active:cursor-grabbing"
+              className="flex cursor-grab items-center justify-between border-b border-border bg-gradient-to-r from-primary/20 to-purple-600/20 px-4 py-3 active:cursor-grabbing"
             >
               <div className="flex items-center gap-2">
-                <div className="rounded-lg bg-primary/15 p-2 text-primary">
+                <div className="rounded-lg bg-primary p-2 text-primary-foreground shadow-md">
                   <Bot className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">CodeVyaas AI</p>
+                  <p className="text-sm font-bold text-foreground">
+                    CodeVyaas AI
+                  </p>
                   <p className="text-xs text-muted-foreground">
-                    Ask anything about your code
+                    Editor-aware debugging assistant
                   </p>
                 </div>
               </div>
@@ -270,7 +451,7 @@ export default function ChatbotLauncher() {
                   type="button"
                   aria-label="Reset chat window size"
                   onClick={resetSize}
-                  className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-background/80 hover:text-foreground"
+                  className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                 >
                   <Maximize2 className="h-4 w-4" />
                 </button>
@@ -278,63 +459,157 @@ export default function ChatbotLauncher() {
                   type="button"
                   aria-label="Close chat"
                   onClick={() => setIsOpen(false)}
-                  className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-background/80 hover:text-foreground"
+                  className="rounded-lg p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
             </div>
-            <div className="flex h-[calc(100%-64px)] flex-col bg-background/70 p-4">
-              <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border border-border/60 bg-muted/20 p-3">
+
+            <div className="flex h-[calc(100%-64px)] flex-col bg-background p-4">
+              {/* Messages Area */}
+              <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border border-border bg-card p-3 shadow-inner">
                 {messages.map((message) => (
                   <div
                     key={message.id}
                     className={
                       message.role === "user"
-                        ? "ml-8 rounded-xl bg-primary p-3 text-sm text-primary-foreground"
-                        : "mr-8 flex items-start gap-2 rounded-xl bg-background/80 p-3 shadow-sm"
+                        ? "ml-auto max-w-[85%] rounded-xl bg-primary px-3 py-2.5 text-sm font-medium text-primary-foreground shadow-md"
+                        : "mr-auto max-w-[95%] rounded-xl border border-border bg-card px-3 py-2.5 text-sm shadow-sm"
                     }
                   >
-                    {message.role === "assistant" && (
-                      <div className="rounded-lg bg-primary/10 p-2 text-primary">
-                        <Sparkles className="h-4 w-4" />
+                    <div className="flex items-start gap-2">
+                      {message.role === "assistant" && (
+                        <div className="mt-0.5 rounded-lg bg-primary/10 p-1.5 text-primary">
+                          <Sparkles className="h-4 w-4" />
+                        </div>
+                      )}
+                      <div className="min-w-0 flex-1 space-y-2">
+                        <p className="whitespace-pre-wrap leading-relaxed text-foreground">
+                          {message.text}
+                        </p>
+
+                        {message.role === "assistant" && message.errorType && (
+                          <div className="rounded-lg border border-red-400/30 bg-red-600/90 p-2.5 text-xs text-white shadow-md">
+                            <p className="font-bold tracking-wide">
+                              ERROR TYPE
+                            </p>
+                            <p className="mt-1 font-mono text-sm">
+                              {message.errorType}
+                            </p>
+                          </div>
+                        )}
+
+                        {message.role === "assistant" &&
+                          Boolean(message.bugs?.length) && (
+                            <div className="space-y-2">
+                              {message.bugs?.map((bug, index) => (
+                                <div
+                                  key={`${bug.title}-${index}`}
+                                  className="rounded-lg border border-amber-400/20 bg-amber-500/90 p-2.5 text-xs text-white shadow-md"
+                                >
+                                  <p className="font-bold">
+                                    {bug.line ? `Line ${bug.line}: ` : ""}
+                                    {bug.title}
+                                  </p>
+                                  <p className="mt-1 text-amber-50/90">
+                                    {bug.reason}
+                                  </p>
+                                  <p className="mt-2 font-semibold text-amber-100">
+                                    Fix:{" "}
+                                    <span className="font-normal text-white">
+                                      {bug.fix}
+                                    </span>
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                        {message.role === "assistant" &&
+                          message.correctedCode && (
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => applyFix(message.correctedCode!)}
+                                className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-bold text-white shadow-md transition hover:bg-emerald-500"
+                              >
+                                Apply Fix to Editor
+                              </button>
+
+                              <details className="w-full rounded-lg border border-border bg-card shadow-sm">
+                                <summary className="cursor-pointer px-3 py-2 text-xs font-bold text-foreground select-none">
+                                  Preview corrected code
+                                </summary>
+                                <div className="border-t border-border bg-black/5 p-3">
+                                  <pre className="max-h-52 overflow-auto whitespace-pre-wrap text-xs font-mono leading-relaxed text-foreground">
+                                    {message.correctedCode}
+                                  </pre>
+                                </div>
+                              </details>
+                            </div>
+                          )}
                       </div>
-                    )}
-                    <p className="text-sm">{message.text}</p>
+                    </div>
                   </div>
                 ))}
-                <div className="flex items-start gap-2 rounded-xl bg-primary/10 p-3 text-sm text-foreground/90">
+
+                <div className="flex items-start gap-2 rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground shadow-sm">
                   <Move className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
                   <span>
-                    Drag the header to move me anywhere. Pull the corner to
-                    resize me.
+                    Drag the header to move. Pull the bottom-right corner to
+                    resize.
                   </span>
                 </div>
               </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={autoFixCurrentCode}
+                  disabled={isLoading}
+                  className="rounded-lg border-2 border-primary bg-primary px-4 py-2 text-xs font-extrabold text-white shadow-lg transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {isLoading ? "Analyzing..." : "Debug & Auto Fix"}
+                </button>
+
+                {previousCode && (
+                  <button
+                    type="button"
+                    onClick={restorePreviousCode}
+                    disabled={isLoading}
+                    className="rounded-lg border-2 border-border bg-card px-4 py-2 text-xs font-bold text-foreground shadow-sm transition hover:bg-muted disabled:opacity-50"
+                  >
+                    Restore Previous Code
+                  </button>
+                )}
+              </div>
+
               <form
                 onSubmit={sendMessage}
-                className="mt-3 flex items-center gap-2 rounded-xl border border-primary/20 bg-background/90 p-2"
+                className="mt-3 flex items-center gap-2 rounded-xl border-2 border-border bg-card p-2 shadow-md"
               >
                 <input
                   value={input}
-                  onChange={(event) => setInput(event.target.value)}
+                  onChange={(e) => setInput(e.target.value)}
                   aria-label="Chat message"
                   placeholder="Ask your next question…"
-                  className="min-w-0 flex-1 bg-transparent px-2 py-1.5 text-sm outline-none placeholder:text-muted-foreground"
+                  className="min-w-0 flex-1 bg-transparent px-3 py-2 text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="rounded-lg bg-primary p-2 text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-primary px-3 py-2 font-bold text-white shadow-md transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                 </button>
               </form>
             </div>
+
             <div
               onPointerDown={startResize}
               aria-label="Resize chat window"
-              className="absolute bottom-0 right-0 h-5 w-5 cursor-se-resize rounded-tl-lg bg-gradient-to-br from-transparent to-primary/30"
+              className="absolute bottom-0 right-0 h-5 w-5 cursor-se-resize rounded-tl-lg border-t border-l border-border bg-gradient-to-br from-transparent to-primary/40"
             />
           </motion.div>
         )}
