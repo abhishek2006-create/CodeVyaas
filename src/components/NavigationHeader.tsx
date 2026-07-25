@@ -3,6 +3,7 @@ import NavbarSettings from "@/components/settings/NavbarSettings";
 import { SignedOut } from "@clerk/nextjs";
 import { Blocks, Code2, Sparkles } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 function NavigationHeader() {
   return (
@@ -21,7 +22,13 @@ function NavigationHeader() {
 
               {/* Logo */}
               <div className="relative bg-gradient-to-br from-gray-900 to-black p-2 rounded-xl ring-1 ring-white/10 group-hover:ring-white/20 transition-all shadow-md">
-                <Blocks className="w-6 h-6 text-blue-400 transform -rotate-6 group-hover:rotate-0 transition-transform duration-500" />
+                <Image
+                    src="/compiler.png"
+                    alt="Compiler"
+                    width={24}
+                    height={24}
+                    className="size-6 -rotate-6 transition-transform duration-500 group-hover:rotate-0 bg-primary"
+                />
               </div>
 
               <div className="relative">

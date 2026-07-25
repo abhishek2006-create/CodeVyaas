@@ -12,6 +12,26 @@ export default defineSchema({
     lemonSqueezyOrderId: v.optional(v.string()),
   }).index("by_user_id", ["userId"]),
 
+  playgrounds: defineTable({
+    title: v.string(),
+    description: v.optional(v.string()),
+    template: v.string(),
+    userId: v.string(),
+  }).index("by_user", ["userId"]),
+
+  templateFiles: defineTable({
+    playgroundId: v.id("playgrounds"),
+    content: v.string(),
+  }).index("by_playground", ["playgroundId"]),
+
+  starMarks: defineTable({
+    userId: v.string(),
+    playgroundId: v.id("playgrounds"),
+    isMarked: v.boolean(),
+  }).index("by_user", ["userId"])
+      .index("by_playground", ["playgroundId"])
+      .index("by_user_playground", ["userId", "playgroundId"]),
+
   codeExecutions: defineTable({
     userId: v.string(),
     language: v.string(),

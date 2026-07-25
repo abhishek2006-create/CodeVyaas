@@ -9,6 +9,7 @@ import LanguageSelector from "./LanguageSelector";
 import RunButton from "./RunButton";
 import HeaderProfileBtn from "./HeaderProfileBtn";
 import ChatbotLauncher from "./ChatbotLauncher";
+import Image from "next/image";
 
 async function Header() {
   let convexUser: { isPro?: boolean } | null = null;
@@ -44,7 +45,13 @@ async function Header() {
                 className="relative bg-gradient-to-br from-gray-900 to-black p-2 rounded-xl ring-1
               ring-white/10 group-hover:ring-white/20 transition-all shadow-md"
               >
-                <Blocks className="size-6 text-blue-400 transform -rotate-6 group-hover:rotate-0 transition-transform duration-500" />
+                <Image
+                    src="/compiler.png"
+                    alt="Compiler"
+                    width={24}
+                    height={24}
+                    className="size-6 -rotate-6 transition-transform duration-500 group-hover:rotate-0 bg-primary"
+                />
               </div>
 
               <div className="flex flex-col">
