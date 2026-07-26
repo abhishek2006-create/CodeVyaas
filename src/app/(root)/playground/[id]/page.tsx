@@ -102,7 +102,7 @@ export default function MainPlaygroundPage() {
 //     error: containerError,
 //     instance,
 //     writeFileSync,
-//     // @ts-ignore
+//    // @ts-expect-error
 //   } = useWebContainer({ templateData });
 //
 //   const lastSyncedContent = useRef<Map<string, string>>(new Map());

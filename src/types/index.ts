@@ -51,7 +51,7 @@ export interface CodeEditorState {
   error: string | null;
   isRunning: boolean;
 
-  editor: any;
+  editor: Monaco | null;
   executionResult: {
     code: string;
     output: string;

@@ -6,7 +6,7 @@ export default withUt({
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-    "./node_modules/@uploadthing/react/dist/**", // <-- Add this line here
+    "./node_modules/@uploadthing/react/dist/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {

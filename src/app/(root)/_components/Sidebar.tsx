@@ -6,7 +6,6 @@ import {
   GitBranch, 
   Play, 
   Blocks, 
-  Settings, 
   UserCircle 
 } from "lucide-react";
 import { SetStateAction, useState} from "react";
@@ -22,9 +21,13 @@ const ICONS = [
 export default function Sidebar() {
   const [active, setActive] = useState("explorer");
 
-  const handleActive = (items_id: SetStateAction<string>)=>{
-    active === items_id ? setActive("") : setActive(items_id);
-  }
+  const handleActive = (items_id: SetStateAction<string>) => {
+    if (active === items_id) {
+      setActive("");
+    } else {
+      setActive(items_id);
+    }
+  };
   return (
     <div className="w-12 flex flex-col items-center py-4 gap-4 glass-panel border-y-0 border-l-0 rounded-none h-full transition-all duration-300">
       {ICONS.map((item) => (

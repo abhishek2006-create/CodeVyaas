@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import {
   useWebsiteTheme,
-  ColorMode,
 } from "@/components/providers/WebsiteThemeProvider";
 import useMounted from "@/hooks/useMounted";
 import {
@@ -164,7 +163,7 @@ function ThemeSubmenu({
   const { websiteTheme, setWebsiteTheme, colorMode, setColorMode } =
     useWebsiteTheme();
   const { theme: editorTheme, setTheme: setEditorTheme } = useCodeEditorStore();
-  const [mode, setMode] = useState("");
+  const [selectedMode, setSelectedMode] = useState("development");
 
   if (type === "website-theme") {
     return (
@@ -215,17 +214,17 @@ function ThemeSubmenu({
   if (type === "mode") {
     return (
       <>
-        {["dsa", "development"].map((mode) => (
+        {["dsa", "development"].map((option) => (
           <ModeChanger
-            label={mode.charAt(0).toUpperCase() + mode.slice(1)}
-            icon={MODE_ICONS[mode]}
-            isActive={mode === mode}
-            key={mode}
+            label={option.charAt(0).toUpperCase() + option.slice(1)}
+            icon={MODE_ICONS[option]}
+            isActive={selectedMode === option}
+            key={option}
             onSelect={() => {
-              setMode(mode);
-              if (mode === "development") {
+              setSelectedMode(option);
+              if (option === "development") {
                 redirect("/development");
-              } else if (mode === "dsa") {
+              } else if (option === "dsa") {
                 redirect("/");
               }
             }}

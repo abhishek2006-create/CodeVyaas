@@ -1,5 +1,4 @@
 import { CodeEditorState } from "./../types/index";
-import { LANGUAGE_CONFIG } from "@/app/(root)/_constants";
 import { create } from "zustand";
 import { Monaco } from "@monaco-editor/react";
 
@@ -37,29 +36,29 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     editor: null,
     executionResult: null,
 
-  getCode: () => get().editor?.getValue() || "",
+    getCode: () => get().editor?.getValue() || "",
 
-setCode: (code: string) => {
-  const { editor, language } = get();
+    setCode: (code: string) => {
+      const { editor, language } = get();
 
-  if (typeof window !== "undefined") {
-    localStorage.setItem(`editor-code-${language}`, code);
-  }
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`editor-code-${language}`, code);
+      }
 
-  if (editor && editor.getValue() !== code) {
-    editor.setValue(code);
-  }
-},
+      if (editor && editor.getValue() !== code) {
+        editor.setValue(code);
+      }
+    },
 
-setEditor: (editor: Monaco) => {
-  const savedCode = localStorage.getItem(`editor-code-${get().language}`);
+    setEditor: (editor: Monaco) => {
+      const savedCode = localStorage.getItem(`editor-code-${get().language}`);
 
-  if (savedCode) {
-    editor.setValue(savedCode);
-  }
+      if (savedCode) {
+        editor.setValue(savedCode);
+      }
 
-  set({ editor });
-},
+      set({ editor });
+    },
 
     setTheme: (theme: string) => {
       localStorage.setItem("editor-theme", theme);
@@ -72,7 +71,6 @@ setEditor: (editor: Monaco) => {
     },
 
     setLanguage: (language: string) => {
-      // Save current language code before switching
       const currentCode = get().editor?.getValue();
       if (currentCode) {
         localStorage.setItem(`editor-code-${get().language}`, currentCode);
@@ -87,76 +85,76 @@ setEditor: (editor: Monaco) => {
       });
     },
 
-  runCode: async () => {
-  const { language, getCode } = get();
-  const code = getCode();
+    runCode: async () => {
+      const { language, getCode } = get();
+      const code = getCode();
 
-  if (!code.trim()) {
-    set({ error: "Please enter some code" });
-    return;
-  }
+      if (!code.trim()) {
+        set({ error: "Please enter some code" });
+        return;
+      }
 
-  set({ isRunning: true, error: null, output: "" });
+      set({ isRunning: true, error: null, output: "" });
 
-  try {
-    const judgeApiUrl =
-      process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
+      try {
+        const judgeApiUrl =
+          process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
 
-    const response = await fetch(`${judgeApiUrl}/api/execute`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        language,
-        source: code, // Docker Judge API expects `source`, not `code`
-        stdin: "", // Replace later with your editor's custom input state
-      }),
-    });
+        const response = await fetch(`${judgeApiUrl}/api/execute`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            language,
+            source: code,
+            stdin: "",
+          }),
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok) {
-      const error = data.error || data.stderr || "Failed to execute code";
+        if (!response.ok) {
+          const error = data.error || data.stderr || "Failed to execute code";
 
-      set({
-        error,
-        executionResult: { code, output: "", error },
-      });
-      return;
-    }
+          set({
+            error,
+            executionResult: { code, output: "", error },
+          });
+          return;
+        }
 
-    const output = data.stdout ?? "";
-    const error =
-      data.timedOut
-        ? "Execution timed out"
-        : data.exitCode !== 0
-          ? data.stderr || "Code execution failed"
-          : null;
+        const output = data.stdout ?? "";
+        const error =
+          data.timedOut
+            ? "Execution timed out"
+            : data.exitCode !== 0
+            ? data.stderr || "Code execution failed"
+            : null;
 
-    set({
-      output: output.trim(),
-      error,
-      executionResult: {
-        code,
-        output: output.trim(),
-        error,
-      },
-    });
-  } catch (error) {
-    console.error("Error running code:", error);
+        set({
+          output: output.trim(),
+          error,
+          executionResult: {
+            code,
+            output: output.trim(),
+            error,
+          },
+        });
+      } catch (error) {
+        console.error("Error running code:", error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : "Error running code";
+        const errorMessage =
+          error instanceof Error ? error.message : "Error running code";
 
-    set({
-      error: errorMessage,
-      executionResult: { code, output: "", error: errorMessage },
-    });
-  } finally {
-    set({ isRunning: false });
-  }
-},
+        set({
+          error: errorMessage,
+          executionResult: { code, output: "", error: errorMessage },
+        });
+      } finally {
+        set({ isRunning: false });
+      }
+    },
   };
 });
 

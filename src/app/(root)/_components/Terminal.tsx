@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { 
   ChevronUp, 
-  Maximize2, 
   MoreHorizontal, 
   Plus, 
   TerminalIcon, 

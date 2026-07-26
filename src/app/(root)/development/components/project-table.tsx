@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { format } from "date-fns";
 import type { Project } from "@/app/(root)/development/components/types";
 import { Badge } from "@/components/ui/badge";
@@ -80,14 +79,11 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [favoutrie, setFavourite] = useState(false);
 
-  const deletePlayground = useMutation(api.playground.action.deletePlayground);
-  const duplicatePlayground = useMutation(
-    api.playground.action.duplicatePlayground,
-  );
   const updatePlayground = useMutation(api.playground.action.updatePlayground);
   const toggleStar = useMutation(api.playground.action.toggleStar);
+  const deletePlayground = useMutation(api.playground.action.deletePlayground);
+  const duplicatePlayground = useMutation(api.playground.action.duplicatePlayground);
 
   const handleEditClick = (project: Project) => {
     setSelectedProject(project);

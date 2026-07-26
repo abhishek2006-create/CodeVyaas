@@ -3,7 +3,15 @@
 import { ChevronDown, ChevronRight, FileCode, Folder, MoreHorizontal } from "lucide-react";
 import { useState } from "react";
 
-const FILES = [
+interface FileItemData {
+  id: string;
+  name: string;
+  type: "folder" | "file";
+  isOpen?: boolean;
+  children?: FileItemData[];
+}
+
+const FILES: FileItemData[] = [
   { id: "1", name: "src", type: "folder", isOpen: true, children: [
     { id: "2", name: "app", type: "folder", isOpen: true, children: [
       { id: "3", name: "page.tsx", type: "file" },
@@ -39,7 +47,15 @@ export default function FileExplorer() {
   );
 }
 
-function FileItem({ item, depth }: { item: any, depth: number }) {
+interface FileItemData {
+  id: string;
+  name: string;
+  type: "folder" | "file";
+  isOpen?: boolean;
+  children?: FileItemData[];
+}
+
+function FileItem({ item, depth }: { item: FileItemData; depth: number }) {
   const [isOpen, setIsOpen] = useState(item.isOpen);
 
   return (

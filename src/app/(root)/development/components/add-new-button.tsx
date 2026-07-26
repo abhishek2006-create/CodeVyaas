@@ -2,24 +2,16 @@
 
 import TemplateSelectionModal from "@/components/modals/template-selecter-model";
 import { Button } from "@/components/ui/button";
-import { Github, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import AddNewIllustration from "@/assets/add-new.svg";
 import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 
 const AddNewButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [selectedTemplate, setSelectedTemplate] = useState<{
-    title: string;
-    template: "REACT" | "NEXTJS" | "EXPRESS" | "VUE" | "HONO" | "ANGULAR";
-    description?: string;
-  } | null>(null);
-
   const router = useRouter();
 
   const createPlayground = useMutation(api.playground.action.createPlayground);
@@ -30,8 +22,6 @@ const AddNewButton = () => {
     description?: string;
   }) => {
     try {
-      setSelectedTemplate(data);
-
       const playgroundId = await createPlayground({
         title: data.title,
         template: data.template,

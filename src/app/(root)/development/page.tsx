@@ -21,13 +21,6 @@ const EmptyState = () => (
 export default function DashboardMainPage() {
   const playgrounds = useQuery(api.playground.action.getPlaygrounds) ?? [];
 
-  const deletePlayground = useMutation(api.playground.action.deletePlayground);
-
-  const updatePlayground = useMutation(api.playground.action.updatePlayground);
-
-  const duplicatePlayground = useMutation(
-    api.playground.action.duplicatePlayground,
-  );
 
   return (
     <>
