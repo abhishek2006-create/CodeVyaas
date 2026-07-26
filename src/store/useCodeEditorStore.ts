@@ -97,10 +97,10 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       set({ isRunning: true, error: null, output: "" });
 
       try {
-        const judgeApiUrl =
-          process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
+        // const judgeApiUrl =
+        //   process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
 
-        const response = await fetch(`${judgeApiUrl}/api/execute`, {
+        const response = await fetch(`/api/execute`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
