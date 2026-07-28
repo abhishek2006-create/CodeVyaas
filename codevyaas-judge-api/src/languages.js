@@ -22,7 +22,7 @@ export const languages = {
   },
   typescript: {
     image: "codevyaas-runner-typescript:1.0",
-    filename: "main.ts",
+    filename: "main.js",
     maxSourceBytes: 100_000,
   },
   rust: {

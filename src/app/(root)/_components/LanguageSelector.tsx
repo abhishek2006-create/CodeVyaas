@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { ChevronDownIcon, Lock, Sparkles } from "lucide-react";
 import useMounted from "@/hooks/useMounted";
+import { Button } from "@/components/ui/button";
 
 function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -17,7 +18,10 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     };
@@ -84,7 +88,9 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
            rounded-xl shadow-2xl py-2 z-50"
           >
             <div className="px-3 pb-2 mb-2 border-b border-border">
-              <p className="text-xs font-medium text-muted-foreground">Select Language</p>
+              <p className="text-xs font-medium text-muted-foreground">
+                Select Language
+              </p>
             </div>
 
             <div className="max-h-[280px] overflow-y-auto overflow-x-hidden">
@@ -99,7 +105,7 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
                     transition={{ delay: index * 0.1 }}
                     className="relative group px-2"
                   >
-                    <button
+                    <Button
                       className={`
                       relative w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
                       ${language === lang.id ? "bg-primary/10 text-primary" : "text-muted-foreground"}
@@ -156,7 +162,7 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
                           <Sparkles className="w-4 h-4 text-primary animate-pulse" />
                         )
                       )}
-                    </button>
+                    </Button>
                   </motion.div>
                 );
               })}

@@ -10,14 +10,13 @@ export const createPlayground = mutation({
 
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) throw new Error("Unauthorized");
 
     const playgroundId = await ctx.db.insert("playgrounds", {
       title: args.title,
       description: args.description,
       template: args.template,
-      userId: identity.subject,
+      userId: identity.tokenIdentifier,
     });
 
     return playgroundId;
@@ -27,12 +26,11 @@ export const createPlayground = mutation({
 export const getPlaygrounds = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) return [];
 
     const playgrounds = await ctx.db
       .query("playgrounds")
-      .withIndex("by_user", (q) => q.eq("userId", identity.subject))
+      .withIndex("by_user", (q) => q.eq("userId", identity.tokenIdentifier))
       .collect();
 
     return await Promise.all(
@@ -40,7 +38,9 @@ export const getPlaygrounds = query({
         const star = await ctx.db
           .query("starMarks")
           .withIndex("by_user_playground", (q) =>
-            q.eq("userId", identity.subject).eq("playgroundId", playground._id),
+            q
+              .eq("userId", identity.tokenIdentifier)
+              .eq("playgroundId", playground._id),
           )
           .unique();
 
@@ -59,7 +59,19 @@ export const getPlayground = query({
   },
 
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.id);
+    const identity = await ctx.auth.getUserIdentity();
+    const playground = await ctx.db.get(args.id);
+    if (!playground) return null;
+    if (playground.userId !== identity?.subject) throw new Error("Forbidden");
+    const templateFiles = await ctx.db
+      .query("templateFiles")
+      .withIndex("by_playground", (q) => q.eq("playgroundId", args.id))
+      .collect();
+
+    return {
+      ...playground,
+      templateFiles,
+    };
   },
 });
 
@@ -75,7 +87,7 @@ export const deletePlayground = mutation({
     }
     const playground = await ctx.db.get(args.id);
     if (!playground) throw new Error("Playground Not Found");
-    if (playground?.userId !== identity.subject)
+    if (playground.userId !== identity.tokenIdentifier)
       throw new Error("Forbidden to delete");
     await ctx.db.delete(args.id);
   },
@@ -89,12 +101,13 @@ export const updatePlayground = mutation({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-
     if (!identity) throw new Error("Unauthorized user!");
+
     const playground = await ctx.db.get(args.id);
     if (!playground) throw new Error("Playground Not Found");
-    if (playground?.userId !== identity.subject)
+    if (playground.userId !== identity.tokenIdentifier)
       throw new Error("Forbidden to update");
+
     await ctx.db.patch(args.id, {
       title: args.title,
       description: args.description,
@@ -149,13 +162,14 @@ export const duplicatePlayground = mutation({
     const playground = await ctx.db.get(args.id);
     if (!playground) throw new Error("Playground Not Found");
 
-    if (playground.userId !== identity.subject)
+    if (playground.userId !== identity.tokenIdentifier)
       throw new Error("Forbidden to duplicate");
+
     const newPlaygroundId = await ctx.db.insert("playgrounds", {
       description: playground.description,
       title: `${playground.title}(Copy)`,
       template: playground.template,
-      userId: playground.userId,
+      userId: identity.tokenIdentifier,
     });
 
     const TemplateFile = await ctx.db
@@ -187,14 +201,16 @@ export const toggleStar = mutation({
     const existing = await ctx.db
       .query("starMarks")
       .withIndex("by_user_playground", (q) =>
-        q.eq("userId", identity.subject).eq("playgroundId", args.playgroundId),
+        q
+          .eq("userId", identity.tokenIdentifier)
+          .eq("playgroundId", args.playgroundId),
       )
       .unique();
 
     if (args.isMarked) {
       if (!existing) {
         await ctx.db.insert("starMarks", {
-          userId: identity.subject,
+          userId: identity.tokenIdentifier,
           playgroundId: args.playgroundId,
           isMarked: true,
         });

@@ -66,7 +66,7 @@ export default function Terminal() {
           </div>
           <button className="p-1 hover:bg-muted/40 rounded transition-colors"><Plus className="size-4" /></button>
           <button className="p-1 hover:bg-muted/40 rounded transition-colors"><MoreHorizontal className="size-4" /></button>
-          <button 
+          <button
             onClick={() => setIsMinimized(!isMinimized)}
             className="p-1 hover:bg-muted/40 rounded transition-colors"
           >

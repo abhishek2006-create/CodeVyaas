@@ -1,7 +1,13 @@
 "use client";
 
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { AlertTriangle, CheckCircle, Clock, Copy, Terminal } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Clock,
+  Copy,
+  Terminal,
+} from "lucide-react";
 import { useState } from "react";
 import RunningCodeSkeleton from "./RunningCodeSkeleton";
 
@@ -64,7 +70,9 @@ function OutputPanel() {
               <AlertTriangle className="w-5 h-5 flex-shrink-0 mt-1" />
               <div className="space-y-1">
                 <div className="font-medium">Execution Error</div>
-                <pre className="whitespace-pre-wrap text-red-400/80">{error}</pre>
+                <pre className="whitespace-pre-wrap text-red-400/80">
+                  {error}
+                </pre>
               </div>
             </div>
           ) : output ? (
@@ -73,14 +81,18 @@ function OutputPanel() {
                 <CheckCircle className="w-5 h-5" />
                 <span className="font-medium">Execution Successful</span>
               </div>
-              <pre className="whitespace-pre-wrap text-foreground">{output}</pre>
+              <pre className="whitespace-pre-wrap text-foreground">
+                {output}
+              </pre>
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
               <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/20 ring-1 ring-border mb-4">
                 <Clock className="w-6 h-6" />
               </div>
-              <p className="text-center">Run your code to see the output here...</p>
+              <p className="text-center">
+                Run your code to see the output here...
+              </p>
             </div>
           )}
         </div>

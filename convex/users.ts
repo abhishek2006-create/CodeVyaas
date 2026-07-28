@@ -10,8 +10,8 @@ export const syncUser = mutation({
   handler: async (ctx, args) => {
     const existingUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
-      .first();
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
 
     if (!existingUser) {
       await ctx.db.insert("users", {
@@ -32,9 +32,8 @@ export const getUser = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_user_id")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
-      .first();
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
 
     if (!user) return null;
 
@@ -52,8 +51,8 @@ export const upgradeToPro = mutation({
   handler: async (ctx, args) => {
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), args.email))
-      .first();
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
 
     if (!user) throw new Error("User not found");
 

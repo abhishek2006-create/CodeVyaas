@@ -9,14 +9,21 @@ import NavigationHeader from "@/components/NavigationHeader";
 import { Clock, Code, MessageSquare, User } from "lucide-react";
 import { Editor } from "@monaco-editor/react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "@/app/(root)/_constants";
+import { useWebsiteTheme } from "@/components/providers/WebsiteThemeProvider";
 import CopyButton from "./_components/CopyButton";
 import Comments from "./_components/Comments";
+import { useEffect } from "react";
 
 function SnippetDetailPage() {
   const snippetId = useParams().id;
+  const { websiteTheme, resolvedColorMode } = useWebsiteTheme();
 
-  const snippet = useQuery(api.snippets.getSnippetById, { snippetId: snippetId as Id<"snippets"> });
-  const comments = useQuery(api.snippets.getComments, { snippetId: snippetId as Id<"snippets"> });
+  const snippet = useQuery(api.snippets.getSnippetById, {
+    snippetId: snippetId as Id<"snippets">,
+  });
+  const comments = useQuery(api.snippets.getComments, {
+    snippetId: snippetId as Id<"snippets">,
+  });
 
   if (snippet === undefined) return <SnippetLoadingSkeleton />;
 
@@ -48,7 +55,9 @@ function SnippetDetailPage() {
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Clock className="w-4 h-4" />
-                      <span>{new Date(snippet._creationTime).toLocaleDateString()}</span>
+                      <span>
+                        {new Date(snippet._creationTime).toLocaleDateString()}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <MessageSquare className="w-4 h-4" />
@@ -77,7 +86,9 @@ function SnippetDetailPage() {
               language={LANGUAGE_CONFIG[snippet.language].monacoLanguage}
               value={snippet.code}
               theme="codevyaas"
-              beforeMount={defineMonacoThemes}
+              onMount={(editor, monaco) => {
+                defineMonacoThemes(monaco);
+              }}
               options={{
                 minimap: { enabled: false },
                 fontSize: 16,

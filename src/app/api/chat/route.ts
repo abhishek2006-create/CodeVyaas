@@ -7,25 +7,18 @@ type Message = {
 
 export async function POST(request: Request) {
   try {
-   const {
-  messages,
-  code,
-  output,
-  error,
-  language,
-} = await request.json();
+    const { messages, code, output, error, language } = await request.json();
 
     const response = await fetch("http://127.0.0.1:11434/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "qwen2.5-coder:7b", 
+        model: "qwen2.5-coder:7b",
         stream: false,
         messages: [
           {
             role: "system",
-            content:
-            `You are a helpful coding assistant. You will be provided with the following information: 
+            content: `You are a helpful coding assistant. You will be provided with the following information: 
             ${language} 
             Current Code: ${code}
             Current Output: ${output}
@@ -42,9 +35,9 @@ export async function POST(request: Request) {
             - Answer in markdown.
             `,
           },
-          ...messages.map(({ role, text }) => ({
-            role,
-            content: text,
+          ...messages.map((m: { role: string; text: string }) => ({
+            role: m.role,
+            content: m.text,
           })),
         ],
       }),

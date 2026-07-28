@@ -10,7 +10,6 @@ const getInitialState = () => {
       language: "javascript",
       fontSize: 16,
       theme: "vs-dark",
-      
     };
   }
 
@@ -38,8 +37,11 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     executionResult: null,
 
     getCode: () => get().editor?.getValue() || "",
+    setCode: (code: string) => {
+      get().editor?.setValue(code);
+    },
 
-    setEditor: (editor: Monaco) => {
+    setEditor: (editor: any) => {
       const savedCode = localStorage.getItem(`editor-code-${get().language}`);
       if (savedCode) editor.setValue(savedCode);
 
@@ -72,77 +74,77 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       });
     },
 
-  runCode: async () => {
-  const { language, getCode } = get();
-  const code = getCode();
+    runCode: async () => {
+      const { language, getCode } = get();
+      const code = getCode();
 
-  if (!code.trim()) {
-    set({ error: "Please enter some code" });
-    return;
-  }
+      if (!code.trim()) {
+        set({ error: "Please enter some code" });
+        return;
+      }
 
-  set({ isRunning: true, error: null, output: "" });
+      set({ isRunning: true, error: null, output: "" });
 
-  try {
-    const judgeApiUrl =
-      process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
+      try {
+        const judgeApiUrl =
+          process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
 
-    const response = await fetch(`${judgeApiUrl}/api/execute`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        language,
-        source: code, // Docker Judge API expects `source`, not `code`
-        stdin: "", // Replace later with your editor's custom input state
-      }),
-    });
+        const response = await fetch(`${judgeApiUrl}/api/execute`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            language,
+            source: code, // Docker Judge API expects `source`, not `code`
+            stdin: "", // Replace later with your editor's custom input state
+          }),
+        });
 
-    const data = await response.json();
+        const data = await response.json();
 
-    if (!response.ok) {
-      const error = data.error || data.stderr || "Failed to execute code";
+        if (!response.ok) {
+          const error = data.error || data.stderr || "Failed to execute code";
 
-      set({
-        error,
-        executionResult: { code, output: "", error },
-      });
-      return;
-    }
+          set({
+            error,
+            executionResult: { code, output: "", error },
+          });
+          return;
+        }
 
-    const output = data.stdout ?? "";
-    const error =
-      data.timedOut
-        ? "Execution timed out"
-        : data.exitCode !== 0
-          ? data.stderr || "Code execution failed"
-          : null;
+        const output = data.stdout ?? "";
+        const error = data.timedOut
+          ? "Execution timed out"
+          : data.exitCode !== 0
+            ? data.stderr || "Code execution failed"
+            : null;
 
-    set({
-      output: output.trim(),
-      error,
-      executionResult: {
-        code,
-        output: output.trim(),
-        error,
-      },
-    });
-  } catch (error) {
-    console.error("Error running code:", error);
+        set({
+          output: output.trim(),
+          error,
+          executionResult: {
+            code,
+            output: output.trim(),
+            error,
+          },
+        });
+      } catch (error) {
+        console.error("Error running code:", error);
 
-    const errorMessage =
-      error instanceof Error ? error.message : "Error running code";
+        const errorMessage =
+          error instanceof Error ? error.message : "Error running code";
 
-    set({
-      error: errorMessage,
-      executionResult: { code, output: "", error: errorMessage },
-    });
-  } finally {
-    set({ isRunning: false });
-  }
-},
+        set({
+          error: errorMessage,
+          executionResult: { code, output: "", error: errorMessage },
+        });
+      } finally {
+        set({ isRunning: false });
+      }
+    },
   };
 });
 
-export const getExecutionResult = () => useCodeEditorStore.getState().executionResult;
+export const getExecutionResult = () =>
+  useCodeEditorStore.getState().executionResult;
