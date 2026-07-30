@@ -34,7 +34,7 @@ http.route({
         });
 
         if (success) {
-          // optionally do anything here
+        
         }
       }
 
@@ -84,7 +84,7 @@ http.route({
 
     const eventType = evt.type;
     if (eventType === "user.created") {
-      // save the user to convex db
+      
       const { id, email_addresses, first_name, last_name } = evt.data;
 
       const email = email_addresses[0].email_address;
