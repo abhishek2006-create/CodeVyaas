@@ -92,11 +92,11 @@ async function PricingPage() {
                   <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 ring-1 ring-border mb-6">
                     <Star className="w-8 h-8 text-primary" />
                   </div>
-                  <h2 className="text-3xl font-semibold text-foreground mb-4">Lifetime Pro Access</h2>
+                  <h2 className="text-3xl font-semibold text-foreground mb-4">3 months Pro Access</h2>
                   <div className="flex items-baseline justify-center gap-2 mb-4">
-                    <span className="text-2xl text-muted-foreground">$</span>
+                    <span className="text-2xl text-muted-foreground">₹</span>
                     <span className="text-6xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 text-transparent bg-clip-text">
-                      1.99
+                      249
                     </span>
                     <span className="text-xl text-muted-foreground">one-time</span>
                   </div>
