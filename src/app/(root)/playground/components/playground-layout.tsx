@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useCallback } from "react";
 import { usePlayground } from "../hooks/playground-context";
 import { AlertCircle, Loader2, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,7 @@ import WebContainerPreview from "../webcontainers/components/webcontainer-previe
 import { useWebContainer } from "../webcontainers/hooks/useWebContainer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
+import type { TerminalRef } from "../webcontainers/components/terminal";
 
 const PlaygroundTerminal = dynamic(
   () => import("../webcontainers/components/terminal"),
@@ -49,13 +51,27 @@ export function PlaygroundLayout() {
     openFile,
   } = usePlayground();
 
+  // 1. Ref to imperative terminal API
+  const terminalRef = useRef<TerminalRef>(null);
+
+  // 2. Stable callback to forward WebContainer stdout/stderr streams to xterm
+  const handleTerminalData = useCallback((data: string) => {
+    if (terminalRef.current) {
+      terminalRef.current.writeToTerminal(data);
+    }
+  }, []);
+
+  // 3. Connect the terminal callback to useWebContainer hook
   const {
     container,
     previewUrl,
     isLoading: containerLoading,
     error: containerError,
     writeFile: writeFileSync,
-  } = useWebContainer({ templateData: templateData as any });
+  } = useWebContainer({
+    templateData: templateData as any,
+    onTerminalData: handleTerminalData,
+  });
 
   if (playgroundError) {
     return (
@@ -96,7 +112,7 @@ export function PlaygroundLayout() {
           onRenameFolder={handleRenameFolder}
         />
         <SidebarInset>
-          {/* Pass previewUrl to PlaygroundHeader */}
+          {/* Header with live preview URL */}
           <PlaygroundHeader liveUrl={previewUrl} />
 
           <main className="flex-1 flex flex-col overflow-hidden">
@@ -160,7 +176,7 @@ export function PlaygroundLayout() {
                   </Tabs>
                 </div>
 
-                {/* Editor and Preview */}
+                {/* Editor, Preview & Terminal Panel Group */}
                 <div className="flex-1 relative">
                   <ResizablePanelGroup
                     orientation="vertical"
@@ -191,7 +207,7 @@ export function PlaygroundLayout() {
                                 writeFileSync={writeFileSync}
                                 isLoading={containerLoading}
                                 error={containerError}
-                                serverUrl={previewUrl} // 👈 Check that previewUrl is passed here
+                                serverUrl={previewUrl}
                                 forceResetup={false}
                               />
                             </ResizablePanel>
@@ -205,7 +221,9 @@ export function PlaygroundLayout() {
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={30} minSize={10}>
                           <div className="h-full flex flex-col min-h-0 overflow-hidden">
+                            {/* 4. Pass ref to terminal */}
                             <PlaygroundTerminal
+                              ref={terminalRef}
                               webContainerInstance={container}
                             />
                           </div>
