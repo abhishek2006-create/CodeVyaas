@@ -2,6 +2,7 @@
 
 import { Loader2, AlertCircle, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState, useRef } from "react";
 
 interface WebContainerPreviewProps {
   serverUrl: string | null;
@@ -17,6 +18,17 @@ export default function WebContainerPreview({
   isLoading,
   error,
 }: WebContainerPreviewProps) {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = () => {
+    if (iframeRef.current && serverUrl) {
+      setIsRefreshing(true);
+      iframeRef.current.src = serverUrl;
+      setTimeout(() => setIsRefreshing(false), 500);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-3 bg-background text-muted-foreground">
@@ -57,6 +69,19 @@ export default function WebContainerPreview({
           {serverUrl}
         </div>
 
+        {/* Reload Preview Button */}
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 w-7 p-0 shrink-0"
+          onClick={handleRefresh}
+          title="Reload Preview"
+        >
+          <RefreshCw
+            className={`h-3.5 w-3.5 ${isRefreshing ? "animate-spin" : ""}`}
+          />
+        </Button>
+
         {/* Open in New Tab Button */}
         <Button
           size="sm"
@@ -73,6 +98,7 @@ export default function WebContainerPreview({
       {/* Preview Iframe */}
       <div className="relative flex-1 w-full h-full bg-white">
         <iframe
+          ref={iframeRef}
           src={serverUrl}
           className="w-full h-full border-0"
           title="WebContainer Live Preview"

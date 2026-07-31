@@ -7,7 +7,7 @@ export interface TemplateFile {
   filename: string;
   fileExtension: string;
   content: string;
-  path?: string; // Relative directory path (e.g., "src/components" or "")
+  path?: string;
 }
 
 export interface TemplateFolder {

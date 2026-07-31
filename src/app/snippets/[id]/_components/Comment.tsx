@@ -56,7 +56,7 @@ function Comment({
           )}
         </div>
 
-        <div className="text-muted-foreground">
+        <div className="text-foreground/90">
           <CommentContent content={comment.content} />
         </div>
       </div>

@@ -1,3 +1,4 @@
+// hooks/useWebContainer.ts
 import { useState, useEffect, useCallback, useRef } from "react";
 import { WebContainer, DirEnt } from "@webcontainer/api";
 import WebContainerService from "../service/webContainerService";
@@ -16,14 +17,25 @@ export function useWebContainer({
 }: UseWebContainerOptions) {
   const { setTemplateData } = usePlayground();
   const [container, setContainer] = useState<WebContainer | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    WebContainerService.getPreviewUrl(),
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(!previewUrl);
   const [error, setError] = useState<string | null>(null);
   const [setupStatus, setSetupStatus] = useState<string>("idle");
 
   const isInitializing = useRef(false);
 
-  // Read WebContainer Virtual FS into React File Tree
+  // Listen to server-ready events globally via service
+  useEffect(() => {
+    const unsubscribe = WebContainerService.onServerReady((_port, url) => {
+      setPreviewUrl(url);
+      setSetupStatus("ready");
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
   const readDirectoryRecursively = useCallback(
     async (
       instance: WebContainer,
@@ -35,8 +47,6 @@ export function useWebContainer({
       })) as DirEnt<string>[];
 
       for (const entry of entries) {
-        // 🚨 Hidden files (.git, .vite) filter.
-        // NOTE: Remove `entry.name === "node_modules"` if you REALLY want node_modules in explorer.
         if (entry.name.startsWith(".")) {
           continue;
         }
@@ -113,17 +123,7 @@ export function useWebContainer({
         if (!isMounted) return;
         setContainer(instance);
 
-        // 1. Capture live proxied URL from WebContainer
-        instance.on("server-ready", (port, url) => {
-          if (isMounted) {
-            console.log(`[WebContainer] Server ready at port ${port}: ${url}`);
-            setPreviewUrl(url);
-            setSetupStatus("ready");
-            setIsLoading(false);
-          }
-        });
-
-        // 2. Initial File Tree Sync (passing instance directly)
+        // Initial File Tree Sync
         const initialItems = await readDirectoryRecursively(instance, "");
         if (isMounted) {
           setTemplateData({
@@ -134,7 +134,7 @@ export function useWebContainer({
           });
         }
 
-        // 3. Watch for live file edits
+        // Watch for live file edits
         let watchDebounce: NodeJS.Timeout;
         const watcher = instance.fs.watch("/", { recursive: true }, () => {
           clearTimeout(watchDebounce);
@@ -156,23 +156,16 @@ export function useWebContainer({
           clearTimeout(watchDebounce);
         };
 
-        // 4. Run `npm install`
+        // Run `npm install`
         setSetupStatus("installing");
         const installProcess = await instance.spawn("npm", ["install"]);
-        await installProcess.exit;
+        const installExitCode = await installProcess.exit;
 
-        // Force a tree refresh after npm install completes
-        const postInstallItems = await readDirectoryRecursively(instance, "");
-        if (isMounted) {
-          setTemplateData({
-            type: "folder",
-            folderName: templateData?.folderName || "root",
-            path: "",
-            items: postInstallItems,
-          });
+        if (installExitCode !== 0) {
+          throw new Error("npm install failed");
         }
 
-        // 5. Run Vite server
+        // Run Vite dev server
         setSetupStatus("starting");
         const devProcess = await instance.spawn("npx", [
           "vite",
@@ -180,7 +173,6 @@ export function useWebContainer({
           "0.0.0.0",
           "--port",
           "5173",
-          "--strictPort",
         ]);
 
         devProcess.output
