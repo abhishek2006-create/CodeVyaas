@@ -10,7 +10,9 @@ export default defineSchema({
     proSince: v.optional(v.number()),
     lemonSqueezyCustomerId: v.optional(v.string()),
     lemonSqueezyOrderId: v.optional(v.string()),
-  }).index("by_user_id", ["userId"]),
+  })
+    .index("by_user_id", ["userId"])
+    .index("by_email", ["email"]),
 
   playgrounds: defineTable({
     title: v.string(),
@@ -28,9 +30,10 @@ export default defineSchema({
     userId: v.string(),
     playgroundId: v.id("playgrounds"),
     isMarked: v.boolean(),
-  }).index("by_user", ["userId"])
-      .index("by_playground", ["playgroundId"])
-      .index("by_user_playground", ["userId", "playgroundId"]),
+  })
+    .index("by_user", ["userId"])
+    .index("by_playground", ["playgroundId"])
+    .index("by_user_playground", ["userId", "playgroundId"]),
 
   codeExecutions: defineTable({
     userId: v.string(),
@@ -59,7 +62,7 @@ export default defineSchema({
     userId: v.string(),
     snippetId: v.id("snippets"),
   })
-  .index("by_user_id",["userId"])
-  .index("by_snippet_id",["snippetId"])
-  .index("by_user_id_and_snippet_id",["userId","snippetId"])
+    .index("by_user_id", ["userId"])
+    .index("by_snippet_id", ["snippetId"])
+    .index("by_user_id_and_snippet_id", ["userId", "snippetId"]),
 });

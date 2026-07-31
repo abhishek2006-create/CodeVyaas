@@ -198,9 +198,9 @@ export async function POST(request: Request) {
             role: "user",
             content: `Current workspace state:\n${workspaceContext}`,
           },
-          ...messages.map(({ role, text }) => ({
-            role,
-            content: text,
+          ...messages.map((m: { role: string; text: string }) => ({
+            role: m.role,
+            content: m.text,
           })),
         ],
       }),

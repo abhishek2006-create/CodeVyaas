@@ -1,5 +1,6 @@
 import { Monaco } from "@monaco-editor/react";
 import { CodeTheme } from "@/types";
+import { getMonacoColor } from "@/lib/color-utils";
 
 type LanguageConfig = Record<
   string,
@@ -77,7 +78,7 @@ console.log('Sum of numbers:', math.sum());`,
     id: "python",
     label: "Python",
     logoPath: "/python.png",
-    judge0LanguageId:71,
+    judge0LanguageId: 71,
     monacoLanguage: "python",
     defaultCode: `# Python Playground
 numbers = [1, 2, 3, 4, 5]
@@ -99,7 +100,7 @@ print(f"Sum of numbers: {numbers_sum}")`,
     id: "java",
     label: "Java",
     logoPath: "/java.png",
-    judge0LanguageId:62,
+    judge0LanguageId: 62,
     monacoLanguage: "java",
     defaultCode: `public class Main {
   public static void main(String[] args) {
@@ -259,7 +260,7 @@ int main() {
     id: "csharp",
     label: "C#",
     logoPath: "/csharp.png",
-    judge0LanguageId:51,
+    judge0LanguageId: 51,
     monacoLanguage: "csharp",
     defaultCode: `using System;
 using System.Linq;
@@ -476,53 +477,57 @@ export const defineMonacoThemes = (monaco: Monaco) => {
     rules: [
       {
         token: "comment",
-        foreground: css("--editor-comment"),
+        foreground: getMonacoColor("--editor-comment"),
       },
       {
         token: "string",
-        foreground: css("--editor-string"),
+        foreground: getMonacoColor("--editor-string"),
       },
       {
         token: "keyword",
-        foreground: css("--editor-keyword"),
+        foreground: getMonacoColor("--editor-keyword"),
       },
       {
         token: "number",
-        foreground: css("--editor-number"),
+        foreground: getMonacoColor("--editor-number"),
       },
       {
         token: "type",
-        foreground: css("--editor-type"),
+        foreground: getMonacoColor("--editor-type"),
       },
       {
         token: "class",
-        foreground: css("--editor-class"),
+        foreground: getMonacoColor("--editor-class"),
       },
       {
         token: "function",
-        foreground: css("--editor-function"),
+        foreground: getMonacoColor("--editor-function"),
       },
       {
         token: "variable",
-        foreground: css("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable"),
       },
       {
         token: "operator",
-        foreground: css("--editor-operator"),
+        foreground: getMonacoColor("--editor-operator"),
       },
     ],
 
     colors: {
-      "editor.background": css("--editor-background"),
-      "editor.foreground": css("--editor-foreground"),
-      "editor.lineHighlightBackground": css("--editor-line-highlight"),
-      "editorLineNumber.foreground": css("--editor-line-number"),
-      "editorLineNumber.activeForeground": css("--editor-line-number-active"),
-      "editor.selectionBackground": css("--editor-selection"),
-      "editor.inactiveSelectionBackground": css("--editor-selection"),
+      "editor.background": getMonacoColor("--editor-background"),
+      "editor.foreground": getMonacoColor("--editor-foreground"),
+      "editor.lineHighlightBackground": getMonacoColor(
+        "--editor-line-highlight",
+      ),
+      "editorLineNumber.foreground": getMonacoColor("--editor-line-number"),
+      "editorLineNumber.activeForeground": getMonacoColor(
+        "--editor-line-number-active",
+      ),
+      "editor.selectionBackground": getMonacoColor("--editor-selection"),
+      "editor.inactiveSelectionBackground":
+        getMonacoColor("--editor-selection"),
     },
   });
-
 
   Object.entries(THEME_DEFINITONS).forEach(([themeName, themeData]) => {
     monaco.editor.defineTheme(themeName, {
@@ -533,5 +538,3 @@ export const defineMonacoThemes = (monaco: Monaco) => {
     });
   });
 };
-
-

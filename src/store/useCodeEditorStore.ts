@@ -9,7 +9,6 @@ const getInitialState = () => {
       language: "javascript",
       fontSize: 16,
       theme: "vs-dark",
-      
     };
   }
 
@@ -37,20 +36,11 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     executionResult: null,
 
     getCode: () => get().editor?.getValue() || "",
-
     setCode: (code: string) => {
-      const { editor, language } = get();
-
-      if (typeof window !== "undefined") {
-        localStorage.setItem(`editor-code-${language}`, code);
-      }
-
-      if (editor && editor.getValue() !== code) {
-        editor.setValue(code);
-      }
+      get().editor?.setValue(code);
     },
 
-    setEditor: (editor: Monaco) => {
+    setEditor: (editor: any) => {
       const savedCode = localStorage.getItem(`editor-code-${get().language}`);
 
       if (savedCode) {
@@ -97,18 +87,18 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       set({ isRunning: true, error: null, output: "" });
 
       try {
-        // const judgeApiUrl =
-        //   process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
+        const judgeApiUrl =
+          process.env.NEXT_PUBLIC_JUDGE_API_URL ?? "http://localhost:3000";
 
-        const response = await fetch(`/api/execute`, {
+        const response = await fetch(`${judgeApiUrl}/api/execute`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
             language,
-            source: code,
-            stdin: "",
+            source: code, // Docker Judge API expects `source`, not `code`
+            stdin: "", // Replace later with your editor's custom input state
           }),
         });
 
@@ -125,10 +115,9 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
         }
 
         const output = data.stdout ?? "";
-        const error =
-          data.timedOut
-            ? "Execution timed out"
-            : data.exitCode !== 0
+        const error = data.timedOut
+          ? "Execution timed out"
+          : data.exitCode !== 0
             ? data.stderr || "Code execution failed"
             : null;
 
@@ -158,4 +147,5 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
   };
 });
 
-export const getExecutionResult = () => useCodeEditorStore.getState().executionResult;
+export const getExecutionResult = () =>
+  useCodeEditorStore.getState().executionResult;

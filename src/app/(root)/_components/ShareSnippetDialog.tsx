@@ -34,15 +34,23 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
       <div className="glass-panel rounded-xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-foreground">Share Snippet</h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+          <h2 className="text-xl font-semibold text-foreground">
+            Share Snippet
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+          >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         <form onSubmit={handleShare}>
           <div className="mb-4">
-            <label htmlFor="title" className="block text-sm font-medium text-muted-foreground mb-2">
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-muted-foreground mb-2"
+            >
               Title
             </label>
             <input
