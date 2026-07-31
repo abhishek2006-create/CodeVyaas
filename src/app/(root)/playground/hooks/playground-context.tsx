@@ -17,7 +17,8 @@ import type {
   OpenFile,
 } from "../components/types";
 import { generateFileId } from "../libs";
-// import ToggleAI from "../components/toggle-ai";
+import WebContainerService from "../webcontainers/service/webContainerService";
+import { populatePaths } from "../utils/fileTree";
 
 interface PlaygroundContextType {
   playgroundData: PlaygroundData | null | undefined;
@@ -44,7 +45,7 @@ interface PlaygroundContextType {
   handleSave: () => Promise<void>;
   handleSaveAll: () => Promise<void>;
 
-  // File system operations
+  // Unified File system operations
   handleAddFile: (file: TemplateFile, parentPath: string) => Promise<void>;
   handleAddFolder: (
     folder: TemplateFolder,
@@ -71,7 +72,6 @@ interface PlaygroundContextType {
   setIsTerminalVisible: (visible: boolean) => void;
   setIsAISuggestionsEnabled: (enabled: boolean) => void;
 
-  // File operations (needed for explorer)
   setTemplateData: (data: TemplateFolder | null) => void;
   saveTemplateData: (data: TemplateFolder) => Promise<void>;
 }
@@ -92,6 +92,7 @@ export function PlaygroundProvider({
   });
   const saveUpdatedCode = useMutation(api.playground.action.saveUpdatedCode);
 
+  // 💡 FIX 1: Initialize templateData as TemplateFolder | null (starts as null while loading)
   const [templateData, setTemplateData] = useState<TemplateFolder | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -124,8 +125,9 @@ export function PlaygroundProvider({
     const rawContent = playgroundData.templateFiles?.[0]?.content;
     if (typeof rawContent === "string") {
       try {
-        const parsedContent = JSON.parse(rawContent);
-        setTemplateData(parsedContent);
+        const parsedContent: TemplateFolder = JSON.parse(rawContent);
+        // 💡 FIX 2: Wrap parsed json with populatePaths before setting state
+        setTemplateData(populatePaths(parsedContent));
         setIsLoading(false);
       } catch (err) {
         console.error("Error parsing template:", err);
@@ -140,7 +142,6 @@ export function PlaygroundProvider({
         if (!playgroundData.template) {
           throw new Error("Playground template is missing");
         }
-        console.log(playgroundData.template);
         const template = playgroundData.template.toLowerCase();
 
         const res = await fetch(
@@ -154,8 +155,8 @@ export function PlaygroundProvider({
         }
 
         const { templateJson } = await res.json();
-
-        setTemplateData(templateJson);
+        // 💡 FIX 3: Wrap fetched template with populatePaths before setting state
+        setTemplateData(populatePaths(templateJson));
       } catch (err) {
         console.error("Error loading template:", err);
         setError("Failed to load template");
@@ -170,13 +171,13 @@ export function PlaygroundProvider({
   const saveTemplateData = useCallback(
     async (data: TemplateFolder) => {
       try {
+        // Ensure path hierarchy remains populated when updating
+        const processedData = populatePaths(data);
         await saveUpdatedCode({
           playgroundId: id as Id<"playgrounds">,
-          content: JSON.stringify(data),
+          content: JSON.stringify(processedData),
         });
-        setTemplateData(data);
-        // Clear unsaved changes flag for all open files if needed,
-        // but usually we save specific files.
+        setTemplateData(processedData);
         toast.success("Changes saved successfully");
       } catch (error) {
         console.error("Error saving template data:", error);
@@ -197,11 +198,16 @@ export function PlaygroundProvider({
         if (existing) return prev;
 
         const newOpenFile: OpenFile = {
-          ...file,
+          type: "file",
+          filename: file.filename,
+          fileExtension: file.fileExtension,
+          content: file.content,
+          path: file.path,
           id: fileId,
           hasUnsavedChanges: false,
           originalContent: file.content,
         };
+
         return [...prev, newOpenFile];
       });
 
@@ -232,7 +238,10 @@ export function PlaygroundProvider({
 
   const updateActiveFileContent = useCallback(
     (content: string) => {
-      if (!activeFileId) return;
+      if (!activeFileId || !templateData) return;
+
+      const file = openFiles.find((f) => f.id === activeFileId);
+
       setOpenFiles((prev) =>
         prev.map((f) =>
           f.id === activeFileId
@@ -244,37 +253,55 @@ export function PlaygroundProvider({
             : f,
         ),
       );
+
+      if (file) {
+        const parentPath = file.path || "";
+        const filePath = parentPath
+          ? `${parentPath}/${file.filename}.${file.fileExtension}`
+          : `${file.filename}.${file.fileExtension}`;
+
+        WebContainerService.writeFile(filePath, content).catch((err) =>
+          console.error("Failed to hot-sync file to WebContainer:", err),
+        );
+      }
     },
-    [activeFileId],
+    [activeFileId, openFiles, templateData],
   );
 
   const handleSaveAll = useCallback(async () => {
     if (!templateData) return;
 
-    // Deep copy templateData and update with content from openFiles
     const updatedTemplate = JSON.parse(
       JSON.stringify(templateData),
     ) as TemplateFolder;
 
-    const updateItems = (
+    const updateAndSync = async (
       items: (TemplateFile | TemplateFolder)[],
       currentFolder: TemplateFolder,
+      currentPath: string,
     ) => {
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         if (item.type === "file") {
-          const fileId = generateFileId(item, currentFolder); // FIXED
+          const fileId = generateFileId(item, currentFolder);
           const openFile = openFiles.find((f) => fileId === f.id);
           if (openFile) {
             item.content = openFile.content;
+            const fullFilePath = currentPath
+              ? `${currentPath}/${item.filename}.${item.fileExtension}`
+              : `${item.filename}.${item.fileExtension}`;
+            await WebContainerService.writeFile(fullFilePath, item.content);
           }
         } else {
-          updateItems(item.items, item);
+          const folderPath = currentPath
+            ? `${currentPath}/${item.folderName}`
+            : item.folderName;
+          await updateAndSync(item.items, item, folderPath);
         }
       }
     };
 
-    updateItems(updatedTemplate.items, updatedTemplate);
+    await updateAndSync(updatedTemplate.items, updatedTemplate, "");
     await saveTemplateData(updatedTemplate);
 
     setOpenFiles((prev) =>
@@ -298,51 +325,29 @@ export function PlaygroundProvider({
         JSON.stringify(templateData),
       ) as TemplateFolder;
 
-      const findAndAdd = (folder: TemplateFolder, path: string) => {
-        const currentPath = folder.folderName;
-        if (currentPath === path || path === "") {
+      const addToFS = (folder: TemplateFolder, path: string): boolean => {
+        if (folder.folderName === path || path === "") {
           folder.items.push(newFile);
           return true;
         }
         for (const item of folder.items) {
           if (item.type === "folder") {
-            const fullPath =
-              path === "" ? item.folderName : `${path}/${item.folderName}`;
-            // This is a bit simplified, but parentPath is usually absolute from root
-            // Let's assume parentPath is matched against folder names for now or full paths
-            if (findAndAdd(item, path)) return true;
+            const subPath = path.startsWith(`${folder.folderName}/`)
+              ? path.substring(folder.folderName.length + 1)
+              : path;
+            if (addToFS(item, subPath)) return true;
           }
         }
         return false;
       };
 
-      // Need a better path matcher if parentPath is complex.
-      // For now, let's just use the logic from useFileExplorer if possible or a simple version.
-      // If parentPath is the root folder name:
-      if (updated.folderName === parentPath) {
-        updated.items.push(newFile);
-      } else {
-        // Recursive find
-        const addToFileSystem = (
-          items: (TemplateFile | TemplateFolder)[],
-          targetPath: string,
-        ): boolean => {
-          for (const item of items) {
-            if (item.type === "folder") {
-              // simplified path matching
-              if (item.folderName === targetPath.split("/").pop()) {
-                item.items.push(newFile);
-                return true;
-              }
-              if (addToFileSystem(item.items, targetPath)) return true;
-            }
-          }
-          return false;
-        };
-        addToFileSystem(updated.items, parentPath);
-      }
-
+      addToFS(updated, parentPath);
       await saveTemplateData(updated);
+
+      const filePath = parentPath
+        ? `${parentPath}/${newFile.filename}.${newFile.fileExtension}`
+        : `${newFile.filename}.${newFile.fileExtension}`;
+      await WebContainerService.writeFile(filePath, newFile.content || "");
     },
     [templateData, saveTemplateData],
   );
@@ -353,25 +358,30 @@ export function PlaygroundProvider({
       const updated = JSON.parse(
         JSON.stringify(templateData),
       ) as TemplateFolder;
-      // same logic as add file
-      if (updated.folderName === parentPath) {
-        updated.items.push(newFolder);
-      } else {
-        const addToFS = (items: any[], target: string): boolean => {
-          for (const item of items) {
-            if (item.type === "folder") {
-              if (item.folderName === target.split("/").pop()) {
-                item.items.push(newFolder);
-                return true;
-              }
-              if (addToFS(item.items, target)) return true;
-            }
+
+      const addToFS = (folder: TemplateFolder, path: string): boolean => {
+        if (folder.folderName === path || path === "") {
+          folder.items.push(newFolder);
+          return true;
+        }
+        for (const item of folder.items) {
+          if (item.type === "folder") {
+            const subPath = path.startsWith(`${folder.folderName}/`)
+              ? path.substring(folder.folderName.length + 1)
+              : path;
+            if (addToFS(item, subPath)) return true;
           }
-          return false;
-        };
-        addToFS(updated.items, parentPath);
-      }
+        }
+        return false;
+      };
+
+      addToFS(updated, parentPath);
       await saveTemplateData(updated);
+
+      const folderPath = parentPath
+        ? `${parentPath}/${newFolder.folderName}`
+        : newFolder.folderName;
+      await WebContainerService.mkdir(folderPath);
     },
     [templateData, saveTemplateData],
   );
@@ -382,6 +392,7 @@ export function PlaygroundProvider({
       const updated = JSON.parse(
         JSON.stringify(templateData),
       ) as TemplateFolder;
+
       const deleteFromFS = (items: any[]): boolean => {
         const index = items.findIndex(
           (item) =>
@@ -400,10 +411,15 @@ export function PlaygroundProvider({
         }
         return false;
       };
+
       deleteFromFS(updated.items);
       await saveTemplateData(updated);
 
-      // Also close if it was open
+      const filePath = parentPath
+        ? `${parentPath}/${file.filename}.${file.fileExtension}`
+        : `${file.filename}.${file.fileExtension}`;
+      await WebContainerService.rm(filePath);
+
       const fileId = generateFileId(file, templateData);
       closeFile(fileId);
     },
@@ -416,6 +432,7 @@ export function PlaygroundProvider({
       const updated = JSON.parse(
         JSON.stringify(templateData),
       ) as TemplateFolder;
+
       const deleteFolderFromFS = (items: any[]): boolean => {
         const index = items.findIndex(
           (item) =>
@@ -432,8 +449,14 @@ export function PlaygroundProvider({
         }
         return false;
       };
+
       deleteFolderFromFS(updated.items);
       await saveTemplateData(updated);
+
+      const folderPath = parentPath
+        ? `${parentPath}/${folder.folderName}`
+        : folder.folderName;
+      await WebContainerService.rm(folderPath);
     },
     [templateData, saveTemplateData],
   );
@@ -449,6 +472,14 @@ export function PlaygroundProvider({
       const updated = JSON.parse(
         JSON.stringify(templateData),
       ) as TemplateFolder;
+
+      const oldPath = parentPath
+        ? `${parentPath}/${file.filename}.${file.fileExtension}`
+        : `${file.filename}.${file.fileExtension}`;
+      const newPath = parentPath
+        ? `${parentPath}/${newName}.${newExt}`
+        : `${newName}.${newExt}`;
+
       const renameInFS = (items: any[]): boolean => {
         const target = items.find(
           (item) =>
@@ -468,8 +499,12 @@ export function PlaygroundProvider({
         }
         return false;
       };
+
       renameInFS(updated.items);
       await saveTemplateData(updated);
+
+      await WebContainerService.writeFile(newPath, file.content || "");
+      await WebContainerService.rm(oldPath);
     },
     [templateData, saveTemplateData],
   );
@@ -480,6 +515,12 @@ export function PlaygroundProvider({
       const updated = JSON.parse(
         JSON.stringify(templateData),
       ) as TemplateFolder;
+
+      const oldPath = parentPath
+        ? `${parentPath}/${folder.folderName}`
+        : folder.folderName;
+      const newPath = parentPath ? `${parentPath}/${newName}` : newName;
+
       const renameFolderInFS = (items: any[]): boolean => {
         const target = items.find(
           (item) =>
@@ -496,8 +537,12 @@ export function PlaygroundProvider({
         }
         return false;
       };
+
       renameFolderInFS(updated.items);
       await saveTemplateData(updated);
+
+      await WebContainerService.mkdir(newPath);
+      await WebContainerService.rm(oldPath);
     },
     [templateData, saveTemplateData],
   );

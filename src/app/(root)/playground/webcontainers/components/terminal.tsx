@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search, Copy, Trash2, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
+import WebContainerService from "../service/webContainerService";
 
 interface TerminalProps {
   webcontainerUrl?: string;
@@ -24,7 +25,6 @@ interface TerminalProps {
   webContainerInstance?: any;
 }
 
-// Define the methods that will be exposed through the ref
 export interface TerminalRef {
   writeToTerminal: (data: string) => void;
   clearTerminal: () => void;
@@ -32,10 +32,7 @@ export interface TerminalRef {
 }
 
 const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
-  (
-    { webcontainerUrl, className, theme = "dark", webContainerInstance },
-    ref,
-  ) => {
+  ({ className, theme = "dark" }, ref) => {
     const shellStarted = useRef(false);
     const terminalRef = useRef<HTMLDivElement>(null);
     const term = useRef<Terminal | null>(null);
@@ -44,12 +41,6 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
     const [isConnected, setIsConnected] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [showSearch, setShowSearch] = useState(false);
-
-    // Command line state
-    const currentLine = useRef<string>("");
-    const cursorPosition = useRef<number>(0);
-    const commandHistory = useRef<string[]>([]);
-    const historyIndex = useRef<number>(-1);
     const shellProcess = useRef<any>(null);
 
     const terminalThemes = {
@@ -127,13 +118,12 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
         theme: terminalThemes[theme],
         allowTransparency: false,
         convertEol: true,
-        scrollback: 5000, // Increase scrollback buffer
+        scrollback: 5000,
         tabStopWidth: 4,
         fastScrollSensitivity: 5,
         scrollSensitivity: 1,
       });
 
-      // Add addons
       const fitAddonInstance = new FitAddon();
       const webLinksAddon = new WebLinksAddon();
       const searchAddonInstance = new SearchAddon();
@@ -148,18 +138,15 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
       searchAddon.current = searchAddonInstance;
       term.current = terminal;
 
-      // Initial fit
       setTimeout(() => {
         fitAddonInstance.fit();
       }, 100);
 
-      // Welcome message
       terminal.writeln("WebContainer Terminal");
 
       return terminal;
     }, [theme]);
 
-    // Expose methods through ref
     useImperativeHandle(ref, () => ({
       writeToTerminal: (data: string) => {
         if (term.current) {
@@ -177,12 +164,13 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
     }));
 
     const startShell = useCallback(async () => {
-      if (!webContainerInstance || !term.current || shellProcess.current)
-        return;
+      if (!term.current || shellProcess.current) return;
 
       try {
+        const instance = await WebContainerService.getInstance();
         console.log("Starting Shell");
-        const shell = await webContainerInstance.spawn("jsh", {
+
+        const shell = await instance.spawn("jsh", {
           terminal: {
             cols: term.current.cols,
             rows: term.current.rows,
@@ -198,10 +186,10 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
             },
           }),
         );
+
         console.log("Shell started");
         const input = shell.input.getWriter();
 
-        // Use the onData directly from terminal
         const dataListener = term.current.onData((data) => {
           input.write(data);
         });
@@ -217,7 +205,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
       } catch (error) {
         console.error("Failed to start shell:", error);
       }
-    }, [webContainerInstance]);
+    }, []);
 
     useEffect(() => {
       let cancelled = false;
@@ -238,13 +226,11 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
         termEl = terminalRef.current;
         termEl?.addEventListener("wheel", handleWheel, { passive: false });
 
-        // Start shell AFTER terminal has been created
-        if (webContainerInstance && !shellStarted.current) {
+        if (!shellStarted.current) {
           shellStarted.current = true;
           await startShell();
         }
 
-        // Setup resize observer
         resizeObserver = new ResizeObserver(() => {
           if (fitAddon.current) {
             setTimeout(() => {
@@ -270,13 +256,11 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
       return () => {
         cancelled = true;
 
-        // Remove the wheel listener safely on unmount
         if (termEl) {
           termEl.removeEventListener("wheel", handleWheel);
         }
 
         resizeObserver?.disconnect();
-
         shellStarted.current = false;
 
         if (shellProcess.current) {
@@ -287,7 +271,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
         term.current?.dispose();
         term.current = null;
       };
-    }, [initializeTerminal, webContainerInstance, startShell]);
+    }, [initializeTerminal, startShell]);
 
     const copyTerminalContent = useCallback(async () => {
       if (term.current) {
@@ -324,9 +308,9 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
       }
     }, []);
 
-    const searchInTerminal = useCallback((term: string) => {
-      if (searchAddon.current && term) {
-        searchAddon.current.findNext(term);
+    const searchInTerminal = useCallback((termToFind: string) => {
+      if (searchAddon.current && termToFind) {
+        searchAddon.current.findNext(termToFind);
       }
     }, []);
 
@@ -337,7 +321,6 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
           className,
         )}
       >
-        {/* Terminal Header */}
         <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
@@ -407,7 +390,6 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
           </div>
         </div>
 
-        {/* Terminal Content */}
         <div className="flex-1 relative min-h-0 w-full overflow-hidden">
           <div
             ref={terminalRef}

@@ -1,115 +1,120 @@
 import { WebContainer } from "@webcontainer/api";
+import type { FileSystemTree } from "@webcontainer/api";
 
-// Singleton class to manage WebContainer instance
 class WebContainerService {
-  private static instance: WebContainerService | null = null;
-  private webcontainerInstance: WebContainer | null = null;
-  private bootPromise: Promise<WebContainer> | null = null;
-  private activeUsers = 0;
+  private static instance: WebContainer | null = null;
+  private static bootPromise: Promise<WebContainer> | null = null;
+  private static previewUrl: string | null = null;
+  private static serverReadyCallbacks: Array<
+    (port: number, url: string) => void
+  > = [];
 
-  private constructor() {}
+  // Add to webContainerService.ts
 
-  public static getInstance(): WebContainerService {
-    if (!WebContainerService.instance) {
-      WebContainerService.instance = new WebContainerService();
+  /**
+   * Read the live directory structure directly from WebContainer.
+   */
+  public static async readdir(dirPath: string = ""): Promise<string[]> {
+    if (!this.instance) return [];
+    const cleanPath = dirPath.replace(/^\/+/, "");
+    try {
+      const entries = await this.instance.fs.readdir(cleanPath, {
+        withFileTypes: true,
+      });
+      // Filter out node_modules & hidden git folders from File Explorer UI
+      return entries
+        .filter(
+          (entry) =>
+            entry.name !== "node_modules" && !entry.name.startsWith("."),
+        )
+        .map((entry) => entry.name);
+    } catch (err) {
+      console.error("Failed to read directory from WebContainer:", err);
+      return [];
     }
-    return WebContainerService.instance;
   }
 
-  public async getWebContainer(): Promise<WebContainer> {
-    if (this.webcontainerInstance) {
-      return this.webcontainerInstance;
+  /**
+   * Returns or boots the singleton WebContainer instance.
+   */
+  public static async getInstance(): Promise<WebContainer> {
+    if (this.instance) {
+      return this.instance;
     }
 
-    if (this.bootPromise) {
-      return this.bootPromise;
-    }
+    if (!this.bootPromise) {
+      this.bootPromise = (async () => {
+        const container = await WebContainer.boot();
+        this.instance = container;
 
-    this.bootPromise = (async () => {
-      try {
-        console.log("Booting WebContainer...");
-        const instance = await WebContainer.boot();
-        console.log("WebContainer booted");
-        this.webcontainerInstance = instance;
-        return instance;
-      } catch (error) {
-        this.bootPromise = null;
-        throw error;
-      }
-    })();
+        container.on("server-ready", (port, url) => {
+          this.previewUrl = url;
+          this.serverReadyCallbacks.forEach((cb) => cb(port, url));
+        });
+
+        return container;
+      })();
+    }
 
     return this.bootPromise;
   }
 
-  public async mountFiles(files: any): Promise<void> {
-    const instance = await this.getWebContainer();
-    await instance.mount(files);
+  /**
+   * Initializes and mounts files into the single WebContainer instance.
+   */
+  public static async setup(files: FileSystemTree): Promise<WebContainer> {
+    const container = await this.getInstance();
+    await container.mount(files);
+    return container;
   }
 
-  public async writeToFile(path: string, content: string): Promise<void> {
-    const instance = await this.getWebContainer();
-
-    // Ensure parent directory exists
-    const pathParts = path.split("/");
-    if (pathParts.length > 1) {
-      const dirPath = pathParts.slice(0, -1).join("/");
-      await instance.fs.mkdir(dirPath, { recursive: true });
-    }
-
-    await instance.fs.writeFile(path, content);
+  public static getPreviewUrl(): string | null {
+    return this.previewUrl;
   }
 
-  public async readFile(path: string): Promise<string> {
-    const instance = await this.getWebContainer();
-    return await instance.fs.readFile(path, "utf-8");
-  }
-
-  public async spawn(
-    command: string,
-    args: string[] = [],
-    options?: any,
-  ): Promise<any> {
-    const instance = await this.getWebContainer();
-    return instance.spawn(command, args, options);
-  }
-
-  public onServerReady(
+  public static onServerReady(
     callback: (port: number, url: string) => void,
   ): () => void {
-    let cleanup: (() => void) | undefined;
-
-    this.getWebContainer().then((instance) => {
-      const listener = instance.on("server-ready", callback);
-      cleanup = () => {
-        // Unfortunately @webcontainer/api doesn't return a clear off() method
-        // for "server-ready" in all versions, but we can manage it if needed.
-        // In the current API, it's a standard EventEmitter style or a callback.
-      };
-    });
-
-    return () => cleanup?.();
-  }
-
-  public useInstance(): void {
-    this.activeUsers++;
-  }
-
-  public releaseInstance(): void {
-    this.activeUsers--;
-    if (this.activeUsers <= 0) {
-      // We might want to keep it alive for a while to speed up subsequent loads
-      // For now, let's keep it simple.
+    this.serverReadyCallbacks.push(callback);
+    if (this.previewUrl) {
+      callback(8080, this.previewUrl);
     }
+    return () => {
+      this.serverReadyCallbacks = this.serverReadyCallbacks.filter(
+        (cb) => cb !== callback,
+      );
+    };
   }
 
-  public teardown(): void {
-    if (this.webcontainerInstance) {
-      this.webcontainerInstance.teardown();
-      this.webcontainerInstance = null;
-    }
-    this.bootPromise = null;
-    this.activeUsers = 0;
+  /**
+   * Helper utility for writing to the active WebContainer virtual filesystem.
+   */
+  public static async writeFile(
+    filePath: string,
+    content: string,
+  ): Promise<void> {
+    if (!this.instance) return;
+    const cleanPath = filePath.replace(/^\/+/, "");
+    await this.instance.fs.writeFile(cleanPath, content);
+  }
+
+  /**
+   * Helper utility for creating directories in WebContainer.
+   */
+  public static async mkdir(dirPath: string): Promise<void> {
+    if (!this.instance) return;
+    const cleanPath = dirPath.replace(/^\/+/, "");
+    await this.instance.fs.mkdir(cleanPath, { recursive: true });
+  }
+
+  /**
+   * Helper utility for deleting files/folders in WebContainer.
+   */
+  public static async rm(targetPath: string): Promise<void> {
+    if (!this.instance) return;
+    const cleanPath = targetPath.replace(/^\/+/, "");
+    await this.instance.fs.rm(cleanPath, { recursive: true, force: true });
   }
 }
 
-export default WebContainerService.getInstance();
+export default WebContainerService;

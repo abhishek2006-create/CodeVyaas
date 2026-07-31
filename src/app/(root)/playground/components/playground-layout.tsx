@@ -1,17 +1,8 @@
 "use client";
 
 import { usePlayground } from "../hooks/playground-context";
-import {
-  AlertCircle,
-  Loader2,
-  FileText,
-  X,
-  Terminal,
-  Globe,
-  Brain,
-} from "lucide-react";
+import { AlertCircle, Loader2, FileText, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Spinner from "@/components/ui/spinner";
 import { PlaygroundEditor } from "./playground-editor";
 import { PlaygroundHeader } from "./playground-header";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -26,6 +17,7 @@ import WebContainerPreview from "../webcontainers/components/webcontainer-previe
 import { useWebContainer } from "../webcontainers/hooks/useWebContainer";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
+
 const PlaygroundTerminal = dynamic(
   () => import("../webcontainers/components/terminal"),
   {
@@ -47,11 +39,7 @@ export function PlaygroundLayout() {
     closeAllFiles,
     updateActiveFileContent,
     isPreviewVisible,
-    setIsPreviewVisible,
     isTerminalVisible,
-    setIsTerminalVisible,
-    isAISuggestionsEnabled,
-    setIsAISuggestionsEnabled,
     handleAddFile,
     handleAddFolder,
     handleDeleteFile,
@@ -62,11 +50,11 @@ export function PlaygroundLayout() {
   } = usePlayground();
 
   const {
-    serverUrl,
+    container,
+    previewUrl,
     isLoading: containerLoading,
     error: containerError,
-    instance,
-    writeFileSync,
+    writeFile: writeFileSync,
   } = useWebContainer({ templateData: templateData as any });
 
   if (playgroundError) {
@@ -108,9 +96,10 @@ export function PlaygroundLayout() {
           onRenameFolder={handleRenameFolder}
         />
         <SidebarInset>
-          <PlaygroundHeader />
+          {/* Pass previewUrl to PlaygroundHeader */}
+          <PlaygroundHeader liveUrl={previewUrl} />
 
-          <main className="flex-1 flex flex-col overflow-hidden ">
+          <main className="flex-1 flex flex-col overflow-hidden">
             {openFiles.length > 0 ? (
               <div className="h-full flex flex-col">
                 {/* File Tabs */}
@@ -199,11 +188,10 @@ export function PlaygroundLayout() {
                             <ResizablePanel defaultSize={50} minSize={30}>
                               <WebContainerPreview
                                 templateData={templateData as any}
-                                instance={instance}
                                 writeFileSync={writeFileSync}
                                 isLoading={containerLoading}
                                 error={containerError}
-                                serverUrl={serverUrl!}
+                                serverUrl={previewUrl} // 👈 Check that previewUrl is passed here
                                 forceResetup={false}
                               />
                             </ResizablePanel>
@@ -216,10 +204,9 @@ export function PlaygroundLayout() {
                       <>
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={30} minSize={10}>
-                          {/* Added flex container with min-h-0 and h-full */}
                           <div className="h-full flex flex-col min-h-0 overflow-hidden">
                             <PlaygroundTerminal
-                              webContainerInstance={instance}
+                              webContainerInstance={container}
                             />
                           </div>
                         </ResizablePanel>

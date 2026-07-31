@@ -7,16 +7,22 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import SnippetLoadingSkeleton from "./_components/SnippetLoadingSkeleton";
 import NavigationHeader from "@/components/NavigationHeader";
 import { Clock, Code, MessageSquare, User } from "lucide-react";
-import { Editor } from "@monaco-editor/react";
+import { Editor, useMonaco } from "@monaco-editor/react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "@/app/(root)/_constants";
 import { useWebsiteTheme } from "@/components/providers/WebsiteThemeProvider";
+import { useCodeEditorStore } from "@/store/useCodeEditorStore";
+import SettingsMenu from "@/components/settings/SettingsMenu"; // Adjust import path as needed
 import CopyButton from "./_components/CopyButton";
 import Comments from "./_components/Comments";
 import { useEffect } from "react";
 
 function SnippetDetailPage() {
   const snippetId = useParams().id;
+  const monaco = useMonaco();
   const { websiteTheme, resolvedColorMode } = useWebsiteTheme();
+
+  // Get global editor theme state from Zustand store
+  const { theme } = useCodeEditorStore();
 
   const snippet = useQuery(api.snippets.getSnippetById, {
     snippetId: snippetId as Id<"snippets">,
@@ -24,6 +30,14 @@ function SnippetDetailPage() {
   const comments = useQuery(api.snippets.getComments, {
     snippetId: snippetId as Id<"snippets">,
   });
+
+  // Dynamically synchronize theme with Monaco when Zustand state changes
+  useEffect(() => {
+    if (monaco) {
+      defineMonacoThemes(monaco);
+      monaco.editor.setTheme(theme);
+    }
+  }, [monaco, theme]);
 
   if (snippet === undefined) return <SnippetLoadingSkeleton />;
 
@@ -61,7 +75,7 @@ function SnippetDetailPage() {
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <MessageSquare className="w-4 h-4" />
-                      <span>{comments?.length} comments</span>
+                      <span>{comments?.length ?? 0} comments</span>
                     </div>
                   </div>
                 </div>
@@ -79,15 +93,20 @@ function SnippetDetailPage() {
                 <Code className="w-4 h-4" />
                 <span className="text-sm font-medium">Source Code</span>
               </div>
-              <CopyButton code={snippet.code} />
+              <div className="flex items-center gap-3">
+                <CopyButton code={snippet.code} />
+              </div>
             </div>
             <Editor
               height="600px"
-              language={LANGUAGE_CONFIG[snippet.language].monacoLanguage}
+              language={
+                LANGUAGE_CONFIG[snippet.language]?.monacoLanguage ??
+                snippet.language
+              }
               value={snippet.code}
-              theme="codevyaas"
-              onMount={(editor, monaco) => {
-                defineMonacoThemes(monaco);
+              theme={theme}
+              beforeMount={(monacoInstance) => {
+                defineMonacoThemes(monacoInstance);
               }}
               options={{
                 minimap: { enabled: false },
@@ -109,4 +128,5 @@ function SnippetDetailPage() {
     </div>
   );
 }
+
 export default SnippetDetailPage;

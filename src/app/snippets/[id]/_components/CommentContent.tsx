@@ -20,7 +20,7 @@ function CommentContent({ content }: { content: string }) {
         }
 
         return part.split("\n").map((line, lineIdx) => (
-          <p key={lineIdx} className="mb-4 text-gray-300 last:mb-0">
+          <p key={lineIdx} className="mb-4 text-muted-foreground last:mb-0">
             {line}
           </p>
         ));

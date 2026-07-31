@@ -13,10 +13,7 @@ import {
   Sun,
   Palette,
 } from "lucide-react";
-import {
-  useWebsiteTheme,
-  ColorMode,
-} from "@/components/providers/WebsiteThemeProvider";
+import { useWebsiteTheme } from "@/components/providers/WebsiteThemeProvider";
 import useMounted from "@/hooks/useMounted";
 import {
   getSettingsMenuSections,
@@ -26,7 +23,7 @@ import {
 import { themes } from "@/config/themes";
 import { CODE_THEMES } from "@/app/(root)/_constants";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { redirect } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const EDITOR_THEME_ICONS: Record<string, React.ReactNode> = {
   "vs-dark": <Moon className="size-4" />,
@@ -93,13 +90,14 @@ function ModeChanger({
       {isActive && (
         <motion.div
           className="absolute inset-0 border-2 border-primary/30 rounded-lg"
-          layoutId="active-theme-border"
+          layoutId="active-mode-border"
           transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
         />
       )}
     </motion.button>
   );
 }
+
 function ThemeOptionButton({
   label,
   color,
@@ -164,7 +162,8 @@ function ThemeSubmenu({
   const { websiteTheme, setWebsiteTheme, colorMode, setColorMode } =
     useWebsiteTheme();
   const { theme: editorTheme, setTheme: setEditorTheme } = useCodeEditorStore();
-  const [mode, setMode] = useState("");
+  const router = useRouter();
+  const pathname = usePathname();
 
   if (type === "website-theme") {
     return (
@@ -213,20 +212,24 @@ function ThemeSubmenu({
   }
 
   if (type === "mode") {
+    const currentMode = pathname.startsWith("/development")
+      ? "development"
+      : "dsa";
+
     return (
       <>
-        {["dsa", "development"].map((mode) => (
+        {["dsa", "development"].map((item) => (
           <ModeChanger
-            label={mode.charAt(0).toUpperCase() + mode.slice(1)}
-            icon={MODE_ICONS[mode]}
-            isActive={mode === mode}
-            key={mode}
+            key={item}
+            label={item.charAt(0).toUpperCase() + item.slice(1)}
+            icon={MODE_ICONS[item]}
+            isActive={currentMode === item}
             onSelect={() => {
-              setMode(mode);
-              if (mode === "development") {
-                redirect("/development");
-              } else if (mode === "dsa") {
-                redirect("/");
+              onSelect?.();
+              if (item === "development") {
+                router.push("/development");
+              } else {
+                router.push("/");
               }
             }}
           />
@@ -279,6 +282,11 @@ function SettingsMenu({ scope, triggerClassName }: SettingsMenuProps) {
     }, 200);
   };
 
+  const closeMenu = () => {
+    setIsOpen(false);
+    setActiveSubmenu(null);
+  };
+
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -289,7 +297,6 @@ function SettingsMenu({ scope, triggerClassName }: SettingsMenuProps) {
     if (isOpen && activeSubmenu && menuRef.current) {
       const menuRect = menuRef.current.getBoundingClientRect();
       const availableRight = window.innerWidth - menuRect.right;
-      // If less than 250px available on the right, open submenu to the left
       setSubmenuSide(availableRight < 250 ? "left" : "right");
     }
   }, [isOpen, activeSubmenu]);
@@ -297,8 +304,7 @@ function SettingsMenu({ scope, triggerClassName }: SettingsMenuProps) {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-        setActiveSubmenu(null);
+        closeMenu();
       }
     };
 
@@ -375,7 +381,6 @@ function SettingsMenu({ scope, triggerClassName }: SettingsMenuProps) {
                     <AnimatePresence>
                       {activeSubmenu === item.type && (
                         <>
-                          {/* Bridge to prevent closing when moving to submenu */}
                           <div
                             className={`absolute top-0 w-2 h-full z-40 ${
                               submenuSide === "right"
@@ -399,7 +404,11 @@ function SettingsMenu({ scope, triggerClassName }: SettingsMenuProps) {
                             transition={{ duration: 0.15 }}
                             className={`
                               absolute top-0 min-w-[240px] bg-[color-mix(in_srgb,var(--popover)_80%,transparent)] backdrop-blur-md rounded-xl border border-border shadow-2xl py-2 z-50
-                              ${submenuSide === "right" ? "left-full ml-1" : "right-full mr-1"}
+                              ${
+                                submenuSide === "right"
+                                  ? "left-full ml-1"
+                                  : "right-full mr-1"
+                              }
                             `}
                           >
                             <div className="px-3 pb-2 mb-2 border-b border-border">
@@ -407,7 +416,10 @@ function SettingsMenu({ scope, triggerClassName }: SettingsMenuProps) {
                                 {item.label}
                               </p>
                             </div>
-                            <ThemeSubmenu type={item.type} />
+                            <ThemeSubmenu
+                              type={item.type}
+                              onSelect={closeMenu}
+                            />
                           </motion.div>
                         </>
                       )}

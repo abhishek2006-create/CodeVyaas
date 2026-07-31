@@ -1,9 +1,6 @@
 import EditorPanel from "./_components/EditorPanel";
 import Header from "./_components/Header";
 import OutputPanel from "./_components/OutputPanel";
-import Terminal from "./_components/Terminal";
-import Sidebar from "./_components/Sidebar";
-import FileExplorer from "./_components/FileExplorer";
 
 export default function Home() {
   return (

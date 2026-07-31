@@ -62,7 +62,8 @@ export const getPlayground = query({
     const identity = await ctx.auth.getUserIdentity();
     const playground = await ctx.db.get(args.id);
     if (!playground) return null;
-    if (playground.userId !== identity?.subject) throw new Error("Forbidden");
+    if (playground.userId !== identity?.tokenIdentifier)
+      throw new Error("Forbidden");
     const templateFiles = await ctx.db
       .query("templateFiles")
       .withIndex("by_playground", (q) => q.eq("playgroundId", args.id))

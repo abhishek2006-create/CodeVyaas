@@ -65,7 +65,7 @@ export declare const internalMutation: MutationBuilder<DataModel, "internal">;
  * Define an action in this Convex app's public API.
  *
  * An action is a function which can execute any JavaScript code, including non-deterministic
- * code and code with side-effects, like calling third-party service.
+ * code and code with side-effects, like calling third-party services.
  * They can be run in Convex's JavaScript environment or in Node.js using the "use node" directive.
  * They can interact with the database indirectly by calling queries and mutations using the {@link ActionCtx}.
  *
@@ -96,18 +96,18 @@ export declare const internalAction: ActionBuilder<DataModel, "internal">;
 export declare const httpAction: HttpActionBuilder;
 
 /**
- * A set of service for use within Convex query functions.
+ * A set of services for use within Convex query functions.
  *
  * The query context is passed as the first argument to any Convex query
  * function run on the server.
  *
- * This differs from the {@link MutationCtx} because all of the service are
+ * This differs from the {@link MutationCtx} because all of the services are
  * read-only.
  */
 export type QueryCtx = GenericQueryCtx<DataModel>;
 
 /**
- * A set of service for use within Convex mutation functions.
+ * A set of services for use within Convex mutation functions.
  *
  * The mutation context is passed as the first argument to any Convex mutation
  * function run on the server.
@@ -115,7 +115,7 @@ export type QueryCtx = GenericQueryCtx<DataModel>;
 export type MutationCtx = GenericMutationCtx<DataModel>;
 
 /**
- * A set of service for use within Convex action functions.
+ * A set of services for use within Convex action functions.
  *
  * The action context is passed as the first argument to any Convex action
  * function run on the server.

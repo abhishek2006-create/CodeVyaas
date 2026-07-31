@@ -15,19 +15,31 @@ interface CommentProps {
   isDeleting: boolean;
   currentUserId?: string;
 }
-function Comment({ comment, currentUserId, isDeleting, onDelete }: CommentProps) {
+
+function Comment({
+  comment,
+  currentUserId,
+  isDeleting,
+  onDelete,
+}: CommentProps) {
   return (
     <div className="group">
-      <div className="bg-[#0a0a0f] rounded-xl p-6 border border-[#ffffff0a] hover:border-[#ffffff14] transition-all">
+      <div className="bg-card/40 rounded-xl p-5 sm:p-6 border border-border/60 hover:border-border transition-all duration-200 shadow-sm">
         <div className="flex items-start sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-[#ffffff08] flex items-center justify-center flex-shrink-0">
-              <UserIcon className="w-4 h-4 text-[#808086]" />
+            <div className="w-9 h-9 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center flex-shrink-0">
+              <UserIcon className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="min-w-0">
-              <span className="block text-[#e1e1e3] font-medium truncate">{comment.userName}</span>
-              <span className="block text-sm text-[#808086]">
-                {new Date(comment._creationTime).toLocaleDateString()}
+              <span className="block text-foreground font-medium text-sm sm:text-base truncate">
+                {comment.userName}
+              </span>
+              <span className="block text-xs sm:text-sm text-muted-foreground">
+                {new Date(comment._creationTime).toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
               </span>
             </div>
           </div>
@@ -36,17 +48,20 @@ function Comment({ comment, currentUserId, isDeleting, onDelete }: CommentProps)
             <button
               onClick={() => onDelete(comment._id)}
               disabled={isDeleting}
-              className="opacity-0 group-hover:opacity-100 p-2 hover:bg-red-500/10 rounded-lg transition-all"
+              className="opacity-0 group-hover:opacity-100 p-2 text-destructive/70 hover:text-destructive hover:bg-destructive/10 rounded-lg transition-all focus:opacity-100"
               title="Delete comment"
             >
-              <Trash2Icon className="w-4 h-4 text-red-400" />
+              <Trash2Icon className="w-4 h-4" />
             </button>
           )}
         </div>
 
-        <CommentContent content={comment.content} />
+        <div className="text-muted-foreground">
+          <CommentContent content={comment.content} />
+        </div>
       </div>
     </div>
   );
 }
+
 export default Comment;
