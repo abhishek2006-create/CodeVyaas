@@ -1,4 +1,5 @@
 "use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -17,10 +18,11 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">
+            {/* Added dark:invert and opacity adjustments to match theme colors */}
             <Image
               src="/compiler.png"
               alt="logo"
-              className="text-primary size-10"
+              className="size-10 object-contain opacity-80 hover:opacity-100 transition-opacity dark:invert"
               height={100}
               width={100}
             />
@@ -51,4 +53,5 @@ function Footer() {
     </footer>
   );
 }
+
 export default Footer;

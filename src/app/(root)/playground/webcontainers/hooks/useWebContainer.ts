@@ -1,19 +1,43 @@
-// hooks/useWebContainer.ts
+"use client";
+
 import { useState, useEffect, useCallback, useRef } from "react";
 import { WebContainer, DirEnt } from "@webcontainer/api";
 import WebContainerService from "../service/webContainerService";
-import { transformToWebContainerFormat } from "../hooks/transformer";
+import { transformToWebContainerFormat } from "./transformer";
 import type { TemplateFolder, TemplateFile } from "../../components/types";
 import { usePlayground } from "../../hooks/playground-context";
 
 export interface UseWebContainerOptions {
   templateData: TemplateFolder | null;
   autoStart?: boolean;
+  onTerminalData?: (data: string) => void;
 }
+
+const TEMPLATE_RUN_COMMANDS: Record<string, { cmd: string; args: string[] }> = {
+  react: {
+    cmd: "npm",
+    args: ["run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"],
+  },
+  vue: {
+    cmd: "npm",
+    args: ["run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"],
+  },
+  express: { cmd: "npm", args: ["start"] },
+  hono: { cmd: "npm", args: ["run", "dev"] },
+  nextjs: {
+    cmd: "npm",
+    args: ["run", "dev", "--", "-h", "0.0.0.0", "-p", "5173"],
+  },
+  angular: {
+    cmd: "npm",
+    args: ["start", "--", "--host", "0.0.0.0", "--port", "5173"],
+  },
+};
 
 export function useWebContainer({
   templateData,
   autoStart = true,
+  onTerminalData,
 }: UseWebContainerOptions) {
   const { setTemplateData } = usePlayground();
   const [container, setContainer] = useState<WebContainer | null>(null);
@@ -25,8 +49,8 @@ export function useWebContainer({
   const [setupStatus, setSetupStatus] = useState<string>("idle");
 
   const isInitializing = useRef(false);
+  const watcherCleanupRef = useRef<(() => void) | null>(null);
 
-  // Listen to server-ready events globally via service
   useEffect(() => {
     const unsubscribe = WebContainerService.onServerReady((_port, url) => {
       setPreviewUrl(url);
@@ -47,7 +71,7 @@ export function useWebContainer({
       })) as DirEnt<string>[];
 
       for (const entry of entries) {
-        if (entry.name.startsWith(".")) {
+        if (entry.name.startsWith(".") || entry.name === "node_modules") {
           continue;
         }
 
@@ -89,26 +113,10 @@ export function useWebContainer({
     [],
   );
 
-  const refreshFileSystem = useCallback(async () => {
-    if (!container) return;
-    try {
-      const items = await readDirectoryRecursively(container, "");
-      setTemplateData({
-        type: "folder",
-        folderName: templateData?.folderName || "root",
-        path: "",
-        items,
-      });
-    } catch (err) {
-      console.error("Failed to refresh filesystem:", err);
-    }
-  }, [container, templateData, readDirectoryRecursively, setTemplateData]);
-
   useEffect(() => {
     if (!templateData || isInitializing.current) return;
 
     let isMounted = true;
-    let watcherCleanup: (() => void) | null = null;
     isInitializing.current = true;
 
     async function initializeContainer() {
@@ -123,7 +131,6 @@ export function useWebContainer({
         if (!isMounted) return;
         setContainer(instance);
 
-        // Initial File Tree Sync
         const initialItems = await readDirectoryRecursively(instance, "");
         if (isMounted) {
           setTemplateData({
@@ -134,7 +141,7 @@ export function useWebContainer({
           });
         }
 
-        // Watch for live file edits
+        // File Watcher Setup
         let watchDebounce: NodeJS.Timeout;
         const watcher = instance.fs.watch("/", { recursive: true }, () => {
           clearTimeout(watchDebounce);
@@ -151,35 +158,57 @@ export function useWebContainer({
           }, 800);
         });
 
-        watcherCleanup = () => {
+        watcherCleanupRef.current = () => {
           watcher.close();
           clearTimeout(watchDebounce);
         };
 
-        // Run `npm install`
+        // Install dependencies
         setSetupStatus("installing");
-        const installProcess = await instance.spawn("npm", ["install"]);
-        const installExitCode = await installProcess.exit;
+        if (onTerminalData)
+          onTerminalData("\r\n📦 Installing dependencies...\r\n");
 
+        const installProcess = await instance.spawn("npm", [
+          "install",
+          "--no-audit",
+          "--no-fund",
+        ]);
+
+        installProcess.output.pipeTo(
+          new WritableStream({
+            write(data) {
+              if (onTerminalData) onTerminalData(data);
+            },
+          }),
+        );
+
+        const installExitCode = await installProcess.exit;
         if (installExitCode !== 0) {
-          throw new Error("npm install failed");
+          throw new Error(
+            `npm install failed with exit code ${installExitCode}`,
+          );
         }
 
-        // Run Vite dev server
+        // Run framework dev server via npm script
+        const templateKey = (templateData?.folderName || "react").toLowerCase();
+        const runConfig =
+          TEMPLATE_RUN_COMMANDS[templateKey] || TEMPLATE_RUN_COMMANDS.react;
+
         setSetupStatus("starting");
-        const devProcess = await instance.spawn("npx", [
-          "vite",
-          "--host",
-          "0.0.0.0",
-          "--port",
-          "5173",
-        ]);
+        if (onTerminalData)
+          onTerminalData(
+            `\r\n⚡ Starting ${templateKey.toUpperCase()} dev server...\r\n`,
+          );
+
+        const devProcess = await instance.spawn(runConfig.cmd, runConfig.args);
 
         devProcess.output
           .pipeTo(
             new WritableStream({
               write(data) {
-                console.log("[Vite Console]:", data);
+                if (onTerminalData) {
+                  onTerminalData(data);
+                }
               },
             }),
           )
@@ -202,9 +231,18 @@ export function useWebContainer({
 
     return () => {
       isMounted = false;
-      if (watcherCleanup) watcherCleanup();
+      if (watcherCleanupRef.current) {
+        watcherCleanupRef.current();
+        watcherCleanupRef.current = null;
+      }
     };
-  }, [templateData, autoStart]);
+  }, [
+    templateData,
+    autoStart,
+    onTerminalData,
+    readDirectoryRecursively,
+    setTemplateData,
+  ]);
 
   const writeFile = useCallback(async (path: string, content: string) => {
     await WebContainerService.writeFile(path, content);
@@ -217,7 +255,6 @@ export function useWebContainer({
     error,
     setupStatus,
     writeFile,
-    refreshFileSystem,
   };
 }
 

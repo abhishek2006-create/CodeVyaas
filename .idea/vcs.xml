@@ -2,5 +2,7 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/templates/angular" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/src/templates/nextjs" vcs="Git" />
   </component>
 </project>
