@@ -1,6 +1,27 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+async function getUserHelper(ctx: any, identity: any) {
+  // Try querying by tokenIdentifier or subject
+  let user = await ctx.db
+    .query("users")
+    .withIndex("by_user_id", (q: any) =>
+      q.eq("userId", identity.subject || identity.tokenIdentifier),
+    )
+    .first();
+
+  if (!user) {
+    user = await ctx.db
+      .query("users")
+      .withIndex("by_user_id", (q: any) =>
+        q.eq("userId", identity.tokenIdentifier),
+      )
+      .first();
+  }
+
+  return user;
+}
+
 export const createSnippet = mutation({
   args: {
     title: v.string(),
@@ -11,16 +32,14 @@ export const createSnippet = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_user_id", (q) => q.eq("userId", identity.tokenIdentifier))
-      .unique();
+    const user = await getUserHelper(ctx, identity);
 
-    if (!user) throw new Error("User not found");
+    const userName =
+      user?.name || identity.name || identity.nickname || "Anonymous";
 
     const snippetId = await ctx.db.insert("snippets", {
       userId: identity.tokenIdentifier,
-      userName: user.name,
+      userName: userName,
       title: args.title,
       language: args.language,
       code: args.code,
@@ -34,7 +53,6 @@ export const deleteSnippet = mutation({
   args: {
     snippetId: v.id("snippets"),
   },
-
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
@@ -105,17 +123,15 @@ export const addComment = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_user_id", (q) => q.eq("userId", identity.tokenIdentifier))
-      .unique();
+    const user = await getUserHelper(ctx, identity);
 
-    if (!user) throw new Error("User not found");
+    const userName =
+      user?.name || identity.name || identity.nickname || "Anonymous";
 
     return await ctx.db.insert("snippetComments", {
       snippetId: args.snippetId,
       userId: identity.tokenIdentifier,
-      userName: user.name,
+      userName: userName,
       content: args.content,
     });
   },
@@ -130,7 +146,6 @@ export const deleteComment = mutation({
     const comment = await ctx.db.get(args.commentId);
     if (!comment) throw new Error("Comment not found");
 
-    // Check if the user is the comment author
     if (comment.userId !== identity.tokenIdentifier) {
       throw new Error("Not authorized to delete this comment");
     }
