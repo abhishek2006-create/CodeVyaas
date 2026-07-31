@@ -1,9 +1,6 @@
 import EditorPanel from "./_components/EditorPanel";
 import Header from "./_components/Header";
 import OutputPanel from "./_components/OutputPanel";
-import Terminal from "./_components/Terminal";
-import Sidebar from "./_components/Sidebar";
-import FileExplorer from "./_components/FileExplorer";
 
 export default function Home() {
   return (
@@ -12,16 +9,11 @@ export default function Home() {
         <Header />
 
         <div className="flex flex-1 gap-4 min-h-0">
-          {/* Left Sidebars */}
-          <div className="hidden lg:flex gap-0 rounded-xl overflow-hidden">
-            <Sidebar />
-            <FileExplorer />
-          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 flex-1 min-h-0 overflow-auto">
             <div className="lg:col-span-8 flex flex-col gap-4">
               <EditorPanel />
-              <Terminal />
+        
             </div>
             <div className="lg:col-span-4">
               <OutputPanel />
