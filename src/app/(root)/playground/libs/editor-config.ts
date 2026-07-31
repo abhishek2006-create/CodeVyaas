@@ -440,7 +440,7 @@ export const defaultEditorOptions: editor.IStandaloneEditorConstructionOptions =
 
     // Hover
     hover: {
-      enabled: true,
+      enabled: "on",
       delay: 300,
       sticky: true,
     },
