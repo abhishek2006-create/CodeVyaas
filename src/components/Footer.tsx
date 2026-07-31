@@ -1,7 +1,4 @@
-// @/components/Footer.tsx
-"use client";
-
-import { Blocks } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -19,7 +16,13 @@ function Footer() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Blocks className="size-5" />
+            <Image
+            src="/compiler.png"
+            alt="logo"
+            className="text-primary size-10"
+            height={100}
+            width={100} 
+            />
             <span>Built for developers, by Abhishek And Aditya Raj</span>
           </div>
           <div className="flex items-center gap-6">

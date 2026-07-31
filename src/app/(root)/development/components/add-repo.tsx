@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import { ArrowDown, Github } from "lucide-react";
-import Image from "next/image";
 
 const AddRepo = () => {
   return (

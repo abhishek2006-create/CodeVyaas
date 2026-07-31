@@ -2,7 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
-import { Blocks, Code2, Sparkles } from "lucide-react";
+import { Code2, Sparkles } from "lucide-react";
 import { SignedIn } from "@clerk/nextjs";
 import NavbarSettings from "@/components/settings/NavbarSettings";
 import LanguageSelector from "./LanguageSelector";

@@ -1,7 +1,7 @@
 import HeaderProfileBtn from "@/app/(root)/_components/HeaderProfileBtn";
 import NavbarSettings from "@/components/settings/NavbarSettings";
 import { SignedOut } from "@clerk/nextjs";
-import { Blocks, Code2, Sparkles } from "lucide-react";
+import { Code2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 

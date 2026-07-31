@@ -1,5 +1,4 @@
 import { CodeEditorState } from "./../types/index";
-import { LANGUAGE_CONFIG } from "@/app/(root)/_constants";
 import { create } from "zustand";
 import { Monaco } from "@monaco-editor/react";
 
@@ -43,7 +42,10 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
 
     setEditor: (editor: any) => {
       const savedCode = localStorage.getItem(`editor-code-${get().language}`);
-      if (savedCode) editor.setValue(savedCode);
+
+      if (savedCode) {
+        editor.setValue(savedCode);
+      }
 
       set({ editor });
     },
@@ -59,7 +61,6 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     },
 
     setLanguage: (language: string) => {
-      // Save current language code before switching
       const currentCode = get().editor?.getValue();
       if (currentCode) {
         localStorage.setItem(`editor-code-${get().language}`, currentCode);

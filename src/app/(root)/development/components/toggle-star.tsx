@@ -28,7 +28,7 @@ export const MarkedToggleButton = forwardRef<
   }, [markedForRevision]);
 
   const handleToggle = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    // @ts-ignore
+  
     onClick?.(event);
 
     const previousState = isMarked;

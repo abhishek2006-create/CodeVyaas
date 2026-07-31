@@ -420,8 +420,56 @@ export const THEME_DEFINITONS = {
   },
 };
 
+const toMonacoColor = (value: string): string => {
+  const raw = value.trim();
+
+  if (!raw) {
+    return "000000";
+  }
+
+  if (raw.startsWith("#")) {
+    return raw.slice(1).toLowerCase();
+  }
+
+  if (raw.startsWith("rgb")) {
+    const matches = raw.match(/\d+/g);
+    if (matches && matches.length >= 3) {
+      const [r, g, b] = matches.slice(0, 3).map(Number);
+      return [r, g, b]
+        .map((channel) => Math.round(channel).toString(16).padStart(2, "0"))
+        .join("")
+        .toLowerCase();
+    }
+  }
+
+  if (raw.startsWith("oklch(")) {
+    const temp = document.createElement("div");
+    temp.style.color = raw;
+    temp.style.display = "none";
+    document.body.appendChild(temp);
+
+    const computed = getComputedStyle(temp).color;
+    document.body.removeChild(temp);
+
+    const matches = computed.match(/\d+/g);
+    if (matches && matches.length >= 3) {
+      const [r, g, b] = matches.slice(0, 3).map(Number);
+      return [r, g, b]
+        .map((channel) => Math.round(channel).toString(16).padStart(2, "0"))
+        .join("")
+        .toLowerCase();
+    }
+  }
+
+  return raw.replace("#", "").toLowerCase();
+};
+
 // Helper function to define themes in Monaco
 export const defineMonacoThemes = (monaco: Monaco) => {
+  const root = getComputedStyle(document.documentElement);
+
+  const css = (name: string) => toMonacoColor(root.getPropertyValue(name).trim());
+
   monaco.editor.defineTheme("codevyaas", {
     base: "vs-dark",
     inherit: true,

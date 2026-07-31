@@ -22,7 +22,7 @@ cmd /c npm run start
 
 ```powershell
 $body = @{ language = 'python'; source = 'n = int(input()); print(n * n)'; stdin = '12' } | ConvertTo-Json
-Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/execute -ContentType 'application/json' -Body $body
+Invoke-RestMethod -Method Post -Uri /api/execute -ContentType 'application/json' -Body $body
 ```
 
 The `stdout` value should be `144` followed by a newline.
