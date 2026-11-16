@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { usePlayground } from "../hooks/playground-context";
+import { openWebContainerPreview } from "../webcontainers/open-preview";
 
 export function PlaygroundHeader({ liveUrl }: { liveUrl?: string | null }) {
   const {
@@ -53,7 +54,7 @@ export function PlaygroundHeader({ liveUrl }: { liveUrl?: string | null }) {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.open(liveUrl, "_blank")}
+            onClick={() => openWebContainerPreview(liveUrl)}
             className="gap-2 text-xs h-8 border-green-500/50 hover:bg-green-500/10 text-green-600 dark:text-green-400"
             title="Open live dev server in a new browser tab"
           >

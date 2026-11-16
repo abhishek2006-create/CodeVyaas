@@ -401,11 +401,10 @@ export default function ChatbotLauncher() {
         onClick={() => setIsOpen(true)}
         whileHover={{ scale: 1.03 }}
         whileTap={{ scale: 0.97 }}
-        className="group relative inline-flex items-center gap-2 rounded-xl border border-border/70 bg-background/80 px-3 py-2.5 shadow-sm transition-all hover:border-primary/40 hover:bg-primary/10"
+        className="group relative inline-flex items-center gap-2 rounded-xl border border-border/70 bg-background px-3 py-2.5 shadow-sm transition-all hover:border-primary/40 hover:bg-secondary"
       >
-        <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-primary/10 to-purple-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
         <div className="relative flex items-center gap-2">
-          <div className="rounded-lg bg-primary/10 p-1.5 text-primary">
+          <div className="rounded-lg bg-secondary p-1.5 text-primary">
             <MessageCircleMore className="h-4 w-4" />
           </div>
           <span className="hidden text-sm font-medium text-foreground/90 lg:inline">
@@ -431,7 +430,7 @@ export default function ChatbotLauncher() {
           >
             <div
               onPointerDown={startDrag}
-              className="flex cursor-grab items-center justify-between border-b border-border bg-gradient-to-r from-primary/20 to-purple-600/20 px-4 py-3 active:cursor-grabbing"
+              className="flex cursor-grab items-center justify-between border-b border-border bg-secondary px-4 py-3 active:cursor-grabbing"
             >
               <div className="flex items-center gap-2">
                 <div className="rounded-lg bg-primary p-2 text-primary-foreground shadow-md">
@@ -480,7 +479,7 @@ export default function ChatbotLauncher() {
                   >
                     <div className="flex items-start gap-2">
                       {message.role === "assistant" && (
-                        <div className="mt-0.5 rounded-lg bg-primary/10 p-1.5 text-primary">
+                        <div className="mt-0.5 rounded-lg bg-secondary p-1.5 text-primary">
                           <Sparkles className="h-4 w-4" />
                         </div>
                       )}
@@ -568,7 +567,7 @@ export default function ChatbotLauncher() {
                   type="button"
                   onClick={autoFixCurrentCode}
                   disabled={isLoading}
-                  className="rounded-lg border-2 border-primary bg-primary px-4 py-2 text-xs font-extrabold text-white shadow-lg transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg border-2 border-primary bg-primary px-4 py-2 text-xs font-extrabold text-primary-foreground shadow-lg transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {isLoading ? "Analyzing..." : "Debug & Auto Fix"}
                 </button>
@@ -599,7 +598,7 @@ export default function ChatbotLauncher() {
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="rounded-lg bg-primary px-3 py-2 font-bold text-white shadow-md transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-primary px-3 py-2 font-bold text-primary-foreground shadow-md transition hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <Send className="h-4 w-4" />
                 </button>
@@ -609,7 +608,7 @@ export default function ChatbotLauncher() {
             <div
               onPointerDown={startResize}
               aria-label="Resize chat window"
-              className="absolute bottom-0 right-0 h-5 w-5 cursor-se-resize rounded-tl-lg border-t border-l border-border bg-gradient-to-br from-transparent to-primary/40"
+              className="absolute bottom-0 right-0 h-5 w-5 cursor-se-resize rounded-tl-lg border-t border-l border-border bg-secondary"
             />
           </motion.div>
         )}

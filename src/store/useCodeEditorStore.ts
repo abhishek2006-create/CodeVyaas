@@ -1,6 +1,5 @@
 import { CodeEditorState } from "./../types/index";
 import { create } from "zustand";
-import { Monaco } from "@monaco-editor/react";
 
 const getInitialState = () => {
   // if we're on the server, return default values
@@ -8,18 +7,15 @@ const getInitialState = () => {
     return {
       language: "javascript",
       fontSize: 16,
-      theme: "vs-dark",
     };
   }
 
   // if we're on the client, return values from local storage bc localStorage is a browser API.
   const savedLanguage = localStorage.getItem("editor-language") || "javascript";
-  const savedTheme = localStorage.getItem("editor-theme") || "vs-dark";
   const savedFontSize = localStorage.getItem("editor-font-size") || 16;
 
   return {
     language: savedLanguage,
-    theme: savedTheme,
     fontSize: Number(savedFontSize),
   };
 };
@@ -48,11 +44,6 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
       }
 
       set({ editor });
-    },
-
-    setTheme: (theme: string) => {
-      localStorage.setItem("editor-theme", theme);
-      set({ theme });
     },
 
     setFontSize: (fontSize: number) => {

@@ -1,5 +1,4 @@
 import { Monaco } from "@monaco-editor/react";
-import { CodeTheme } from "@/types";
 import { getMonacoColor } from "@/lib/color-utils";
 
 type LanguageConfig = Record<
@@ -337,139 +336,7 @@ print("Sum of numbers: \\(sum)")`,
   },
 };
 
-export const CODE_THEMES: CodeTheme[] = [
-  { id: "vs-dark", label: "VS Dark", color: "#1e1e1e" },
-  { id: "vs-light", label: "VS Light", color: "#ffffff" },
-  { id: "github-dark", label: "GitHub Dark", color: "#0d1117" },
-  { id: "monokai", label: "Monokai", color: "#272822" },
-  { id: "solarized-dark", label: "Solarized Dark", color: "#002b36" },
-];
-
-export const THEME_DEFINITONS = {
-  "github-dark": {
-    base: "vs-dark",
-    inherit: true,
-    rules: [
-      { token: "comment", foreground: "6e7681" },
-      { token: "string", foreground: "a5d6ff" },
-      { token: "keyword", foreground: "ff7b72" },
-      { token: "number", foreground: "79c0ff" },
-      { token: "type", foreground: "ffa657" },
-      { token: "class", foreground: "ffa657" },
-      { token: "function", foreground: "d2a8ff" },
-      { token: "variable", foreground: "ffa657" },
-      { token: "operator", foreground: "ff7b72" },
-    ],
-    colors: {
-      "editor.background": "#0d1117",
-      "editor.foreground": "#c9d1d9",
-      "editor.lineHighlightBackground": "#161b22",
-      "editorLineNumber.foreground": "#6e7681",
-      "editorIndentGuide.background": "#21262d",
-      "editor.selectionBackground": "#264f78",
-      "editor.inactiveSelectionBackground": "#264f7855",
-    },
-  },
-  monokai: {
-    base: "vs-dark",
-    inherit: true,
-    rules: [
-      { token: "comment", foreground: "75715E" },
-      { token: "string", foreground: "E6DB74" },
-      { token: "keyword", foreground: "F92672" },
-      { token: "number", foreground: "AE81FF" },
-      { token: "type", foreground: "66D9EF" },
-      { token: "class", foreground: "A6E22E" },
-      { token: "function", foreground: "A6E22E" },
-      { token: "variable", foreground: "F8F8F2" },
-      { token: "operator", foreground: "F92672" },
-    ],
-    colors: {
-      "editor.background": "#272822",
-      "editor.foreground": "#F8F8F2",
-      "editorLineNumber.foreground": "#75715E",
-      "editor.selectionBackground": "#49483E",
-      "editor.lineHighlightBackground": "#3E3D32",
-      "editorCursor.foreground": "#F8F8F2",
-      "editor.selectionHighlightBackground": "#49483E",
-    },
-  },
-  "solarized-dark": {
-    base: "vs-dark",
-    inherit: true,
-    rules: [
-      { token: "comment", foreground: "586e75" },
-      { token: "string", foreground: "2aa198" },
-      { token: "keyword", foreground: "859900" },
-      { token: "number", foreground: "d33682" },
-      { token: "type", foreground: "b58900" },
-      { token: "class", foreground: "b58900" },
-      { token: "function", foreground: "268bd2" },
-      { token: "variable", foreground: "b58900" },
-      { token: "operator", foreground: "859900" },
-    ],
-    colors: {
-      "editor.background": "#002b36",
-      "editor.foreground": "#839496",
-      "editorLineNumber.foreground": "#586e75",
-      "editor.selectionBackground": "#073642",
-      "editor.lineHighlightBackground": "#073642",
-      "editorCursor.foreground": "#839496",
-      "editor.selectionHighlightBackground": "#073642",
-    },
-  },
-};
-
-const toMonacoColor = (value: string): string => {
-  const raw = value.trim();
-
-  if (!raw) {
-    return "000000";
-  }
-
-  if (raw.startsWith("#")) {
-    return raw.slice(1).toLowerCase();
-  }
-
-  if (raw.startsWith("rgb")) {
-    const matches = raw.match(/\d+/g);
-    if (matches && matches.length >= 3) {
-      const [r, g, b] = matches.slice(0, 3).map(Number);
-      return [r, g, b]
-        .map((channel) => Math.round(channel).toString(16).padStart(2, "0"))
-        .join("")
-        .toLowerCase();
-    }
-  }
-
-  if (raw.startsWith("oklch(")) {
-    const temp = document.createElement("div");
-    temp.style.color = raw;
-    temp.style.display = "none";
-    document.body.appendChild(temp);
-
-    const computed = getComputedStyle(temp).color;
-    document.body.removeChild(temp);
-
-    const matches = computed.match(/\d+/g);
-    if (matches && matches.length >= 3) {
-      const [r, g, b] = matches.slice(0, 3).map(Number);
-      return [r, g, b]
-        .map((channel) => Math.round(channel).toString(16).padStart(2, "0"))
-        .join("")
-        .toLowerCase();
-    }
-  }
-
-  return raw.replace("#", "").toLowerCase();
-};
-
-// Helper function to define themes in Monaco
 export const defineMonacoThemes = (monaco: Monaco) => {
-  const root = getComputedStyle(document.documentElement);
-
-  const css = (name: string) => toMonacoColor(root.getPropertyValue(name).trim());
-
   monaco.editor.defineTheme("codevyaas", {
     base: "vs-dark",
     inherit: true,
@@ -477,39 +344,39 @@ export const defineMonacoThemes = (monaco: Monaco) => {
     rules: [
       {
         token: "comment",
-        foreground: getMonacoColor("--editor-comment"),
+        foreground: getMonacoColor("--editor-comment").slice(1),
       },
       {
         token: "string",
-        foreground: getMonacoColor("--editor-string"),
+        foreground: getMonacoColor("--editor-string").slice(1),
       },
       {
         token: "keyword",
-        foreground: getMonacoColor("--editor-keyword"),
+        foreground: getMonacoColor("--editor-keyword").slice(1),
       },
       {
         token: "number",
-        foreground: getMonacoColor("--editor-number"),
+        foreground: getMonacoColor("--editor-number").slice(1),
       },
       {
         token: "type",
-        foreground: getMonacoColor("--editor-type"),
+        foreground: getMonacoColor("--editor-type").slice(1),
       },
       {
         token: "class",
-        foreground: getMonacoColor("--editor-class"),
+        foreground: getMonacoColor("--editor-class").slice(1),
       },
       {
         token: "function",
-        foreground: getMonacoColor("--editor-function"),
+        foreground: getMonacoColor("--editor-function").slice(1),
       },
       {
         token: "variable",
-        foreground: getMonacoColor("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable").slice(1),
       },
       {
         token: "operator",
-        foreground: getMonacoColor("--editor-operator"),
+        foreground: getMonacoColor("--editor-operator").slice(1),
       },
     ],
 
@@ -529,12 +396,4 @@ export const defineMonacoThemes = (monaco: Monaco) => {
     },
   });
 
-  Object.entries(THEME_DEFINITONS).forEach(([themeName, themeData]) => {
-    monaco.editor.defineTheme(themeName, {
-      base: themeData.base,
-      inherit: themeData.inherit,
-      rules: themeData.rules,
-      colors: themeData.colors,
-    });
-  });
 };

@@ -2,7 +2,6 @@
 
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
-import { useWebsiteTheme } from "@/components/providers/WebsiteThemeProvider";
 
 export default function ClerkThemeProvider({
                                                children,
@@ -11,26 +10,25 @@ export default function ClerkThemeProvider({
     children: React.ReactNode;
     publishableKey: string | undefined;
 }) {
-    const { resolvedColorMode } = useWebsiteTheme();
 
     return (
         <ClerkProvider
             publishableKey={publishableKey}
             appearance={{
-                baseTheme: resolvedColorMode === "dark" ? dark : undefined,
+                baseTheme: dark,
 
                 variables: {
-                    colorPrimary: "hsl(221.2 83.2% 53.3%)",
+                    colorPrimary: "#f887ff",
                 },
 
                 elements: {
-                    card: "glass-panel border-border shadow-xl",
+                    card: "surface-panel border-border shadow-xl",
                     navbar: "bg-transparent",
                     headerTitle: "text-foreground",
                     headerSubtitle: "text-muted-foreground",
 
                     socialButtonsBlockButton:
-                        "glass-button border-border hover:bg-muted/40",
+                        "surface-button border-border hover:bg-muted",
 
                     formButtonPrimary:
                         "bg-primary text-primary-foreground hover:bg-primary/90",
@@ -38,7 +36,7 @@ export default function ClerkThemeProvider({
                     formFieldLabel: "text-foreground",
 
                     formFieldInput:
-                        "glass-input border-border",
+                        "surface-input border-border",
 
                     footerActionText:
                         "text-muted-foreground",
@@ -47,7 +45,7 @@ export default function ClerkThemeProvider({
                         "text-primary hover:text-primary/90",
 
                     userButtonPopoverCard:
-                        "glass-panel border-border shadow-xl",
+                        "surface-panel border-border shadow-xl",
 
                     userButtonPopoverActionButtonText:
                         "text-foreground",

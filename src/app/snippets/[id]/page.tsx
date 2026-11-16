@@ -7,37 +7,19 @@ import { Id } from "../../../../convex/_generated/dataModel";
 import SnippetLoadingSkeleton from "./_components/SnippetLoadingSkeleton";
 import NavigationHeader from "@/components/NavigationHeader";
 import { Clock, Code, MessageSquare, User } from "lucide-react";
-import { Editor, useMonaco } from "@monaco-editor/react";
+import { Editor } from "@monaco-editor/react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "@/app/(root)/_constants";
-import { useWebsiteTheme } from "@/components/providers/WebsiteThemeProvider";
-import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import SettingsMenu from "@/components/settings/SettingsMenu"; // Adjust import path as needed
 import CopyButton from "./_components/CopyButton";
 import Comments from "./_components/Comments";
-import { useEffect } from "react";
 
 function SnippetDetailPage() {
   const snippetId = useParams().id;
-  const monaco = useMonaco();
-  const { websiteTheme, resolvedColorMode } = useWebsiteTheme();
-
-  // Get global editor theme state from Zustand store
-  const { theme } = useCodeEditorStore();
-
   const snippet = useQuery(api.snippets.getSnippetById, {
     snippetId: snippetId as Id<"snippets">,
   });
   const comments = useQuery(api.snippets.getComments, {
     snippetId: snippetId as Id<"snippets">,
   });
-
-  // Dynamically synchronize theme with Monaco when Zustand state changes
-  useEffect(() => {
-    if (monaco) {
-      defineMonacoThemes(monaco);
-      monaco.editor.setTheme(theme);
-    }
-  }, [monaco, theme]);
 
   if (snippet === undefined) return <SnippetLoadingSkeleton />;
 
@@ -48,10 +30,10 @@ function SnippetDetailPage() {
       <main className="max-w-[90rem] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <div className="max-w-[1200px] mx-auto">
           {/* Header */}
-          <div className="glass-panel rounded-2xl p-6 sm:p-8 mb-6 transition-all duration-300">
+          <div className="surface-panel rounded-2xl p-6 sm:p-8 mb-6 transition-all duration-300">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-4">
-                <div className="flex items-center justify-center size-12 rounded-xl bg-[#ffffff08] p-2.5">
+                <div className="flex items-center justify-center size-12 rounded-xl bg-secondary p-2.5">
                   <img
                     src={`/${snippet.language}.png`}
                     alt={`${snippet.language} logo`}
@@ -80,16 +62,16 @@ function SnippetDetailPage() {
                   </div>
                 </div>
               </div>
-              <div className="inline-flex items-center px-3 py-1.5 bg-[#ffffff08] text-[#808086] rounded-lg text-sm font-medium">
+              <div className="inline-flex items-center px-3 py-1.5 bg-secondary text-muted-foreground rounded-lg text-sm font-medium">
                 {snippet.language}
               </div>
             </div>
           </div>
 
           {/* Code Editor */}
-          <div className="mb-8 rounded-2xl overflow-hidden glass-panel transition-all duration-300">
+          <div className="mb-8 rounded-2xl overflow-hidden surface-panel transition-all duration-300">
             <div className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/5">
-              <div className="flex items-center gap-2 text-[#808086]">
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <Code className="w-4 h-4" />
                 <span className="text-sm font-medium">Source Code</span>
               </div>
@@ -104,7 +86,7 @@ function SnippetDetailPage() {
                 snippet.language
               }
               value={snippet.code}
-              theme={theme}
+              theme="codevyaas"
               beforeMount={(monacoInstance) => {
                 defineMonacoThemes(monacoInstance);
               }}

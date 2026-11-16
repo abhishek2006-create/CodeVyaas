@@ -24,10 +24,10 @@ function Comment({
 }: CommentProps) {
   return (
     <div className="group">
-      <div className="bg-card/40 rounded-xl p-5 sm:p-6 border border-border/60 hover:border-border transition-all duration-200 shadow-sm">
+      <div className="bg-card rounded-xl p-5 sm:p-6 border border-border/60 hover:border-border transition-all duration-200 shadow-sm">
         <div className="flex items-start sm:items-center justify-between gap-4 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-muted/50 border border-border/50 flex items-center justify-center flex-shrink-0">
+            <div className="w-9 h-9 rounded-full bg-muted border border-border/50 flex items-center justify-center flex-shrink-0">
               <UserIcon className="w-4 h-4 text-muted-foreground" />
             </div>
             <div className="min-w-0">

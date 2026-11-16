@@ -28,8 +28,7 @@ async function PricingPage() {
 
   return (
     <div
-      className="relative min-h-screen selection:bg-blue-500/20
-     selection:text-blue-200"
+      className="relative min-h-screen"
     >
       <NavigationHeader />
 
@@ -40,10 +39,8 @@ async function PricingPage() {
           {/* Hero   */}
           <div className="text-center mb-24">
             <div className="relative inline-block">
-              <div className="absolute -inset-px bg-gradient-to-r from-blue-500 to-purple-500 blur-xl opacity-10" />
               <h1
-                className="relative text-5xl md:text-6xl lg:text-7xl font-semibold bg-gradient-to-r
-               from-foreground to-foreground/70 text-transparent bg-clip-text mb-8"
+                className="relative text-5xl md:text-6xl lg:text-7xl font-semibold text-primary mb-8"
               >
                 Elevate Your <br />
                 Development Experience
@@ -59,11 +56,11 @@ async function PricingPage() {
             {ENTERPRISE_FEATURES.map((feature) => (
               <div
                 key={feature.label}
-                className="group relative glass-card rounded-2xl p-6 hover:transform hover:scale-[1.02] transition-all duration-300"
+                className="group relative surface-card rounded-2xl p-6 hover:transform hover:scale-[1.02] transition-all duration-300"
               >
                 <div className="relative">
                   <div
-                    className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 
+                    className="w-12 h-12 rounded-xl bg-secondary
                   flex items-center justify-center mb-4 ring-1 ring-border group-hover:ring-primary/20"
                   >
                     <feature.icon className="w-6 h-6 text-primary" />
@@ -79,23 +76,18 @@ async function PricingPage() {
           {/* Pricing Card */}
 
           <div className="relative max-w-4xl mx-auto">
-            <div className="relative glass-panel rounded-2xl overflow-hidden transition-all duration-300">
-              <div
-                className="absolute inset-x-0 -top-px h-px bg-gradient-to-r 
-              from-transparent via-primary/50 to-transparent"
-              />
-              <div className="absolute inset-x-0 -bottom-px h-px bg-gradient-to-r from-transparent via-secondary/50 to-transparent" />
+            <div className="relative surface-panel rounded-2xl overflow-hidden transition-all duration-300">
 
               <div className="relative p-8 md:p-12">
-               
+
                 <div className="text-center mb-12">
-                  <div className="inline-flex p-3 rounded-xl bg-gradient-to-br from-primary/10 to-secondary/10 ring-1 ring-border mb-6">
+                  <div className="inline-flex p-3 rounded-xl bg-secondary ring-1 ring-border mb-6">
                     <Star className="w-8 h-8 text-primary" />
                   </div>
                   <h2 className="text-3xl font-semibold text-foreground mb-4">3 months Pro Access</h2>
                   <div className="flex items-baseline justify-center gap-2 mb-4">
                     <span className="text-2xl text-muted-foreground">₹</span>
-                    <span className="text-6xl font-semibold bg-gradient-to-r from-foreground to-foreground/70 text-transparent bg-clip-text">
+                    <span className="text-6xl font-semibold text-primary">
                       249
                     </span>
                     <span className="text-xl text-muted-foreground">one-time</span>
@@ -103,7 +95,7 @@ async function PricingPage() {
                   <p className="text-muted-foreground text-lg">Unlock the full potential of CodeVyaas</p>
                 </div>
 
-               
+
                 <div className="grid md:grid-cols-3 gap-12 mb-12">
                   <FeatureCategory label="Development">
                     {FEATURES.development.map((feature, idx) => (
@@ -124,7 +116,7 @@ async function PricingPage() {
                   </FeatureCategory>
                 </div>
 
-                
+
                 <div className="flex justify-center">
                   <SignedIn>
                     <UpgradeButton />

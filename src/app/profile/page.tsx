@@ -57,7 +57,7 @@ function ProfilePage() {
     if (executionStatus === "CanLoadMore") loadMore(5);
   };
 
-  if (!user && isLoaded) return router.push("/");
+  if (!user && isLoaded) return router.push("/workspace");
 
   return (
     <div className="min-h-screen">
@@ -74,7 +74,7 @@ function ProfilePage() {
 
         {/* Main content */}
         <div
-          className="glass-panel rounded-3xl overflow-hidden transition-all duration-300"
+          className="surface-panel rounded-3xl overflow-hidden transition-all duration-300"
         >
           {/* Tabs */}
           <div className="border-b border-gray-800/50">
@@ -84,13 +84,13 @@ function ProfilePage() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as "executions" | "starred")}
                   className={`group flex items-center gap-2 px-6 py-2.5 rounded-lg transition-all duration-200 relative overflow-hidden ${
-                    activeTab === tab.id ? "text-blue-400" : "text-gray-400 hover:text-gray-300"
+                    activeTab === tab.id ? "text-accent-foreground" : "text-gray-400 hover:text-gray-300"
                   }`}
                 >
                   {activeTab === tab.id && (
                     <motion.div
                       layoutId="activeTab"
-                      className="absolute inset-0 bg-blue-500/10 rounded-lg"
+                      className="absolute inset-0 bg-accent rounded-lg"
                       transition={{
                         type: "spring",
                         bounce: 0.2,
@@ -123,10 +123,9 @@ function ProfilePage() {
                       key={execution._id}
                       className="group rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-md hover:shadow-primary/50"
                     >
-                      <div className="flex items-center justify-between p-4 glass-header border border-border rounded-t-xl">
+                      <div className="flex items-center justify-between p-4 surface-header border border-border rounded-t-xl">
                         <div className="flex items-center gap-4">
                           <div className="relative">
-                            <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-20 group-hover:opacity-30 transition-opacity" />
                             <Image
                               src={"/" + execution.language + ".png"}
                               alt=""
@@ -160,11 +159,11 @@ function ProfilePage() {
                         </div>
                       </div>
 
-                      <div className="p-4 glass-panel rounded-b-xl border border-t-0 border-border">
+                      <div className="p-4 surface-panel rounded-b-xl border border-t-0 border-border">
                         <CodeBlock code={execution.code} language={execution.language} />
 
                         {(execution.output || execution.error) && (
-                          <div className="mt-4 p-4 rounded-lg bg-muted/30">
+                          <div className="mt-4 p-4 rounded-lg bg-muted">
                             <h4 className="text-sm font-medium text-muted-foreground mb-2">Output</h4>
                             <pre
                               className={`text-sm ${
@@ -203,7 +202,7 @@ function ProfilePage() {
                     <div className="flex justify-center mt-8">
                       <button
                         onClick={handleLoadMore}
-                        className="px-6 py-3 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg flex items-center gap-2 
+                        className="px-6 py-3 bg-secondary hover:bg-secondary text-primary rounded-lg flex items-center gap-2
                         transition-colors"
                       >
                         Load More
@@ -221,7 +220,7 @@ function ProfilePage() {
                     <div key={snippet._id} className="group relative">
                       <Link href={`/snippets/${snippet._id}`}>
                         <div
-                          className="glass-card rounded-xl border border-border hover:border-primary/50 
+                          className="surface-card rounded-xl border border-border hover:border-primary/50
                           transition-all duration-300 overflow-hidden h-full group-hover:transform
                         group-hover:scale-[1.02]"
                         >
@@ -229,7 +228,6 @@ function ProfilePage() {
                             <div className="flex items-center justify-between mb-4">
                               <div className="flex items-center gap-3">
                                 <div className="relative">
-                                  <div className="absolute inset-0 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-20" />
                                   <Image
                                     src={`/${snippet.language}.png`}
                                     alt={`${snippet.language} logo`}
@@ -238,7 +236,7 @@ function ProfilePage() {
                                     height={40}
                                   />
                                 </div>
-                                <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-sm">
+                                <span className="px-3 py-1 bg-secondary text-primary rounded-lg text-sm">
                                   {snippet.language}
                                 </span>
                               </div>
@@ -261,7 +259,7 @@ function ProfilePage() {
                             </div>
                           </div>
                           <div className="px-6 pb-6">
-                            <div className="bg-muted/30 rounded-lg p-4 overflow-hidden">
+                            <div className="bg-muted rounded-lg p-4 overflow-hidden">
                               <pre className="text-sm text-muted-foreground font-mono line-clamp-3">
                                 {snippet.code}
                               </pre>

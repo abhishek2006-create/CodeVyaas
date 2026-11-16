@@ -3174,6 +3174,78 @@
         <option name="homepage" value="https://ai2.design" />
         <option name="urlTemplate" value="https://ai2.design/r/{name}.json" />
       </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-1st-pouf" />
+        <option name="name" value="1st-pouf" />
+        <option name="namespace" value="@1st-pouf" />
+        <option name="baseUrl" value="https://1st-pouf.worksonmy.dev/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Puffy, pastel claymorphism components and app blocks for React, built with Tailwind CSS v4 and Radix UI." />
+        <option name="homepage" value="https://1st-pouf.worksonmy.dev" />
+        <option name="urlTemplate" value="https://1st-pouf.worksonmy.dev/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-liquefy-ui" />
+        <option name="name" value="Liquefy-ui" />
+        <option name="namespace" value="@liquefy-ui" />
+        <option name="baseUrl" value="https://liquefy-ui.com/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Liquid Glass components for React: WebGL edge refraction and pointer-driven springs over accessible Base UI primitives. TypeScript, RSC-ready, with an MCP server." />
+        <option name="homepage" value="https://liquefy-ui.com" />
+        <option name="urlTemplate" value="https://liquefy-ui.com/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-whiskeyjack" />
+        <option name="name" value="Whiskeyjack" />
+        <option name="namespace" value="@whiskeyjack" />
+        <option name="baseUrl" value="https://whiskeyjack.net/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="A Tauri-first design system: thumb-first components with Metro-style pivot navigation, frosted bottom nav, and tap-again confirmations, on a CSS-variable token pipeline. Hardened across nine shipping apps before extraction." />
+        <option name="homepage" value="https://whiskeyjack.net" />
+        <option name="urlTemplate" value="https://whiskeyjack.net/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-23rd" />
+        <option name="name" value="23rd" />
+        <option name="namespace" value="@23rd" />
+        <option name="baseUrl" value="https://23rd.dev/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Opinionated components for shippers." />
+        <option name="homepage" value="https://23rd.dev" />
+        <option name="urlTemplate" value="https://23rd.dev/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-interior" />
+        <option name="name" value="Interior" />
+        <option name="namespace" value="@interior" />
+        <option name="baseUrl" value="https://www.interior.dev/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Copy-paste React micro-interactions: a headless hook plus a styled example in one self-contained file, with motion as the only dependency." />
+        <option name="homepage" value="https://www.interior.dev" />
+        <option name="urlTemplate" value="https://www.interior.dev/r/{name}.json" />
+      </RegistryConfigState>
+      <RegistryConfigState>
+        <option name="id" value="central-shoogle" />
+        <option name="name" value="Shoogle" />
+        <option name="namespace" value="@shoogle" />
+        <option name="baseUrl" value="https://shoogle.dev/r" />
+        <option name="stylePath" value="/{name}.json" />
+        <option name="type" value="community" />
+        <option name="enabled" value="false" />
+        <option name="description" value="Search shadcn blocks and components across community registries from the CLI" />
+        <option name="homepage" value="https://shoogle.dev" />
+        <option name="urlTemplate" value="https://shoogle.dev/r/{name}.json" />
+      </RegistryConfigState>
     </registryConfigs>
   </component>
 </project>

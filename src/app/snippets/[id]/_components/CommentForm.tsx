@@ -43,7 +43,7 @@ function CommentForm({ isSubmitting, onSubmit }: CommentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="mb-8">
-      <div className="glass-panel rounded-xl border border-border overflow-hidden bg-card/30 transition-all duration-200">
+      <div className="surface-panel rounded-xl border border-border overflow-hidden bg-card transition-all duration-200">
         {/* Comment form header */}
         <div className="flex justify-end gap-2 px-4 pt-3 pb-1 border-b border-border/40">
           <button
@@ -51,7 +51,7 @@ function CommentForm({ isSubmitting, onSubmit }: CommentFormProps) {
             onClick={() => setIsPreview(!isPreview)}
             className={`text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
               isPreview
-                ? "bg-primary/15 text-primary"
+                ? "bg-secondary text-primary"
                 : "hover:bg-muted text-muted-foreground"
             }`}
           >
@@ -61,7 +61,7 @@ function CommentForm({ isSubmitting, onSubmit }: CommentFormProps) {
 
         {/* Comment form body */}
         {isPreview ? (
-          <div className="min-h-[120px] p-4 text-foreground bg-background/20">
+          <div className="min-h-[120px] p-4 text-foreground bg-background">
             {comment.trim() ? (
               <CommentContent content={comment} />
             ) : (
@@ -81,7 +81,7 @@ function CommentForm({ isSubmitting, onSubmit }: CommentFormProps) {
         )}
 
         {/* Comment Form Footer */}
-        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-muted/20 border-t border-border">
+        <div className="flex items-center justify-between gap-4 px-4 py-3 bg-muted border-t border-border">
           <div className="hidden sm:block text-xs text-muted-foreground space-y-1">
             <div className="flex items-center gap-2">
               <CodeIcon className="w-3.5 h-3.5 text-primary" />

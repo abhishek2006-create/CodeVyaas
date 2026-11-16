@@ -1,64 +1,28 @@
 // service/webContainerService.ts
 import { WebContainer } from "@webcontainer/api";
-import type { FileSystemTree } from "@webcontainer/api";
 
 class WebContainerService {
   private static instance: WebContainer | null = null;
   private static bootPromise: Promise<WebContainer> | null = null;
-  private static previewUrl: string | null = null;
-  private static serverReadyCallbacks: Array<
-    (port: number, url: string) => void
-  > = [];
-
   public static async getInstance(): Promise<WebContainer> {
     if (this.instance) {
       return this.instance;
     }
 
     if (!this.bootPromise) {
-      this.bootPromise = (async () => {
-        const container = await WebContainer.boot();
+      if (!window.crossOriginIsolated) {
+        throw new Error("The playground needs a secure, isolated tab. Reopen the project from Development.");
+      }
+      this.bootPromise = WebContainer.boot({ coep: "require-corp" }).then((container) => {
         this.instance = container;
-
-        // Captures port (5173) and preview URL when live server starts
-        container.on("server-ready", (port, url) => {
-          console.log(
-            `[WebContainerService] Server ready at port ${port}: ${url}`,
-          );
-          this.previewUrl = url;
-          this.serverReadyCallbacks.forEach((cb) => cb(port, url));
-        });
-
         return container;
-      })();
+      }).catch((error: unknown) => {
+        this.bootPromise = null;
+        throw error;
+      });
     }
 
     return this.bootPromise;
-  }
-
-  public static async setup(files: FileSystemTree): Promise<WebContainer> {
-    const container = await this.getInstance();
-    await container.mount(files);
-    return container;
-  }
-
-  public static getPreviewUrl(): string | null {
-    return this.previewUrl;
-  }
-
-  public static onServerReady(
-    callback: (port: number, url: string) => void,
-  ): () => void {
-    this.serverReadyCallbacks.push(callback);
-    // If server is already ready when callback is registered, trigger immediately
-    if (this.previewUrl) {
-      callback(5173, this.previewUrl);
-    }
-    return () => {
-      this.serverReadyCallbacks = this.serverReadyCallbacks.filter(
-        (cb) => cb !== callback,
-      );
-    };
   }
 
   public static async readdir(dirPath: string = ""): Promise<string[]> {

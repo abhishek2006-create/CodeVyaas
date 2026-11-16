@@ -330,7 +330,7 @@ const TemplateSelectionModal = ({
                               </h3>
                               <div className="flex gap-1">
                                 {template.category === "frontend" && (
-                                  <Code size={14} className="text-blue-500" />
+                                  <Code size={14} className="text-primary" />
                                 )}
                                 {template.category === "backend" && (
                                   <Server

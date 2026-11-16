@@ -31,6 +31,7 @@ export function PlaygroundLayout() {
     error: playgroundError,
     isLoading: isPlaygroundLoading,
     templateData,
+    setTemplateData,
     activeFile,
     activeFileId,
     openFiles,
@@ -50,12 +51,11 @@ export function PlaygroundLayout() {
   } = usePlayground();
 
   const {
-    container,
     previewUrl,
-    isLoading: containerLoading,
+    status: containerStatus,
     error: containerError,
-    writeFile: writeFileSync,
-  } = useWebContainer({ templateData: templateData as any });
+    retry: retryPreview,
+  } = useWebContainer(templateData, setTemplateData);
 
   if (playgroundError) {
     return (
@@ -103,7 +103,7 @@ export function PlaygroundLayout() {
             {openFiles.length > 0 ? (
               <div className="h-full flex flex-col">
                 {/* File Tabs */}
-                <div className="border-b bg-muted/30">
+                <div className="border-b bg-muted">
                   <Tabs
                     value={activeFileId || ""}
                     onValueChange={setActiveFileId}
@@ -187,12 +187,10 @@ export function PlaygroundLayout() {
                             <ResizableHandle withHandle />
                             <ResizablePanel defaultSize={50} minSize={30}>
                               <WebContainerPreview
-                                templateData={templateData as any}
-                                writeFileSync={writeFileSync}
-                                isLoading={containerLoading}
+                                status={containerStatus}
                                 error={containerError}
-                                serverUrl={previewUrl} // 👈 Check that previewUrl is passed here
-                                forceResetup={false}
+                                serverUrl={previewUrl}
+                                onRetry={retryPreview}
                               />
                             </ResizablePanel>
                           </>
@@ -205,9 +203,7 @@ export function PlaygroundLayout() {
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={30} minSize={10}>
                           <div className="h-full flex flex-col min-h-0 overflow-hidden">
-                            <PlaygroundTerminal
-                              webContainerInstance={container}
-                            />
+                            <PlaygroundTerminal />
                           </div>
                         </ResizablePanel>
                       </>
@@ -216,7 +212,7 @@ export function PlaygroundLayout() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col h-full items-center justify-center text-muted-foreground gap-4 bg-muted/5">
+              <div className="flex flex-col h-full items-center justify-center text-muted-foreground gap-4 bg-muted">
                 <FileText className="h-16 w-16 text-muted-foreground/20" />
                 <div className="text-center">
                   <p className="text-lg font-medium">No files open</p>

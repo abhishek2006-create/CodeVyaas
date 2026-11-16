@@ -2,7 +2,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useState } from "react";
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { codeHighlight } from "@/lib/code-highlight";
 
 interface CodeBlockProps {
   code: string;
@@ -18,11 +18,11 @@ const CodeBlock = ({ code, language }: CodeBlockProps) => {
     <div className="relative">
       <SyntaxHighlighter
         language={language.toLowerCase()}
-        style={atomOneDark}
+        style={codeHighlight}
         customStyle={{
           padding: "1rem",
           borderRadius: "0.5rem",
-          background: "rgba(0, 0, 0, 0.4)",
+          background: "var(--background)",
           margin: 0,
         }}
       >
@@ -32,8 +32,8 @@ const CodeBlock = ({ code, language }: CodeBlockProps) => {
       {lines.length > 6 && (
         <button
           onClick={() => setIsExpanded(!isExpanded)}
-          className="absolute bottom-2 right-2 px-2 py-1 bg-blue-500/20 text-blue-400 rounded text-xs flex items-center 
-          gap-1 hover:bg-blue-500/30 transition-colors"
+          className="absolute bottom-2 right-2 px-2 py-1 bg-accent text-accent-foreground rounded text-xs flex items-center
+          gap-1 hover:bg-primary hover:text-primary-foreground transition-colors"
         >
           {isExpanded ? (
             <>

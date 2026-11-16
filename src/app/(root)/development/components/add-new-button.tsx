@@ -4,7 +4,6 @@ import TemplateSelectionModal from "@/components/modals/template-selecter-model"
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
@@ -12,7 +11,6 @@ import { api } from "../../../../../convex/_generated/api";
 
 const AddNewButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const router = useRouter();
 
   const createPlayground = useMutation(api.playground.action.createPlayground);
 
@@ -34,7 +32,7 @@ const AddNewButton = () => {
 
       setIsModalOpen(false);
 
-      router.push(`/playground/${playgroundId}`);
+      window.location.assign(`/playground/${playgroundId}`);
     } catch (error) {
       console.error(error);
       toast.error("Failed to create playground");
@@ -45,12 +43,13 @@ const AddNewButton = () => {
     <>
       <div
         onClick={() => setIsModalOpen(true)}
-        className="group px-6 py-6 flex flex-row justify-between items-center border rounded-lg bg-muted cursor-pointer transition-all duration-300 ease-in-out hover:bg-background hover:border-[#E93F3F] hover:scale-[1.02] shadow-[0_2px_10px_rgba(0,0,0,0.08)] hover:shadow-[0_10px_30px_rgba(233,63,63,0.15)]"
+        className="group relative flex cursor-pointer items-center justify-between rounded-lg border border-border bg-card p-6 transition-colors hover:border-primary hover:bg-secondary"
       >
         <div className="flex flex-row justify-center items-start gap-4">
           <Button
             variant={"outline"}
-            className="flex justify-center items-center bg-white group-hover:bg-[#fff8f8] group-hover:border-[#E93F3F] group-hover:text-[#E93F3F] transition-colors duration-300"
+            aria-label="New project"
+            className="flex items-center justify-center border-border bg-accent text-accent-foreground group-hover:bg-accent"
             size={"icon"}
           >
             <Plus
@@ -59,8 +58,8 @@ const AddNewButton = () => {
             />
           </Button>
           <div className="flex flex-col">
-            <h1 className="text-xl font-bold text-[#e93f3f] hover:">Add New</h1>
-            <p className="text-sm text-muted-foreground max-w-[220px]">
+            <h2 className="text-xl font-semibold text-foreground">New project</h2>
+            <p className="max-w-[220px] text-sm text-muted-foreground">
               Create a new playground
             </p>
           </div>

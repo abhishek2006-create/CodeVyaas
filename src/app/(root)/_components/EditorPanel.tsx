@@ -3,7 +3,7 @@
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { useEffect, useState } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
-import { Editor, useMonaco } from "@monaco-editor/react";
+import { Editor } from "@monaco-editor/react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { RotateCcwIcon, ShareIcon, TypeIcon } from "lucide-react";
@@ -11,13 +11,11 @@ import { useClerk } from "@clerk/nextjs";
 import { EditorPanelSkeleton } from "./EditorPanelSkeleton";
 import useMounted from "@/hooks/useMounted";
 import ShareSnippetDialog from "./ShareSnippetDialog";
-import EditorSettings from "@/components/settings/EditorSettings";
 
 function EditorPanel() {
-  const monaco = useMonaco();
   const clerk = useClerk();
   const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
-  const { language, theme, fontSize, editor, setFontSize, setEditor } =
+  const { language, fontSize, editor, setFontSize, setEditor } =
     useCodeEditorStore();
 
   const mounted = useMounted();
@@ -42,13 +40,6 @@ function EditorPanel() {
     }
   }, [fontSize, editor]);
 
-  // Synchronize Monaco theme changes reliably when Zustand theme updates
-  useEffect(() => {
-    if (!monaco) return;
-    defineMonacoThemes(monaco);
-    monaco.editor.setTheme(theme);
-  }, [monaco, theme]);
-
   const handleRefresh = () => {
     const defaultCode = LANGUAGE_CONFIG[language].defaultCode;
     if (editor) editor.setValue(defaultCode);
@@ -71,11 +62,11 @@ function EditorPanel() {
 
   return (
     <div className="relative group">
-      <div className="relative glass-panel rounded-xl p-6 transition-all duration-300">
+      <div className="relative surface-panel rounded-xl p-6 transition-all duration-300">
         {/* Header */}
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10 ring-1 ring-border">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-secondary ring-1 ring-border">
               <Image
                 src={`/${language}.png`}
                 alt="Logo"
@@ -93,10 +84,9 @@ function EditorPanel() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <EditorSettings />
 
             {/* Font Size Slider */}
-            <div className="flex items-center gap-3 px-3 py-2 bg-muted/20 rounded-lg ring-1 ring-border">
+            <div className="flex items-center gap-3 px-3 py-2 bg-muted rounded-lg ring-1 ring-border">
               <TypeIcon className="size-4 text-muted-foreground" />
               <div className="flex items-center gap-3">
                 <input
@@ -119,7 +109,7 @@ function EditorPanel() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={handleRefresh}
-              className="p-2 bg-muted/20 hover:bg-muted/40 rounded-lg ring-1 ring-border transition-colors"
+              className="p-2 bg-muted hover:bg-muted rounded-lg ring-1 ring-border transition-colors"
               aria-label="Reset to default code"
             >
               <RotateCcwIcon className="size-4 text-muted-foreground" />
@@ -130,7 +120,7 @@ function EditorPanel() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setIsShareDialogOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary hover:bg-primary/90 transition-all"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
             >
               <ShareIcon className="size-4 text-primary-foreground" />
               <span className="text-sm font-medium text-primary-foreground">
@@ -150,7 +140,7 @@ function EditorPanel() {
               height="600px"
               language={LANGUAGE_CONFIG[language].monacoLanguage}
               onChange={handleEditorChange}
-              theme={theme}
+              theme="codevyaas"
               beforeMount={(monacoInstance) => {
                 // Ensure themes are registered right before mounting
                 defineMonacoThemes(monacoInstance);
