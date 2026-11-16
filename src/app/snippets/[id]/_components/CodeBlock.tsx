@@ -1,17 +1,17 @@
 import SyntaxHighlighter from "react-syntax-highlighter";
-import { atomOneDark } from "react-syntax-highlighter/dist/esm/styles/hljs";
+import { codeHighlight } from "@/lib/code-highlight";
 import CopyButton from "./CopyButton";
 
 const CodeBlock = ({ language, code }: { language: string; code: string }) => {
   const trimmedCode = code
-    .split("\n") 
-    .map((line) => line.trimEnd()) 
-    .join("\n"); 
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .join("\n");
 
   return (
-    <div className="my-4 bg-[#0a0a0f] rounded-lg overflow-hidden border border-[#ffffff0a]">
-   
-      <div className="flex items-center justify-between px-4 py-2 bg-[#ffffff08]">
+    <div className="my-4 bg-background rounded-lg overflow-hidden border border-border">
+
+      <div className="flex items-center justify-between px-4 py-2 bg-secondary">
         <div className="flex items-center gap-2">
           <img
             src={`/${language}.png`}
@@ -28,14 +28,14 @@ const CodeBlock = ({ language, code }: { language: string; code: string }) => {
       <div className="relative">
         <SyntaxHighlighter
           language={language || "plaintext"}
-          style={atomOneDark} 
+          style={codeHighlight}
           customStyle={{
             padding: "1rem",
-            background: "zinc-900",
+            background: "var(--background)",
             margin: 0,
           }}
           showLineNumbers={true}
-          wrapLines={true} 
+          wrapLines={true}
         >
           {trimmedCode}
         </SyntaxHighlighter>

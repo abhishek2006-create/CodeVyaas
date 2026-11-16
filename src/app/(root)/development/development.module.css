@@ -1,0 +1,13 @@
+.launch {
+  display: grid;
+  gap: 2rem;
+  padding: clamp(1.25rem, 4vw, 3rem);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--raspberry);
+  border-radius: 1rem;
+  background: var(--plum);
+  color: var(--foreground);
+}
+
+.intro { width: fit-content; }
+.intro h1 { color: var(--orchid); }

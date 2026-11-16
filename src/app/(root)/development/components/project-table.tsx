@@ -42,7 +42,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import Link from "next/link";
 import { useState } from "react";
 import {
   MoreHorizontal,
@@ -195,12 +194,12 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
               <TableRow key={project._id}>
                 <TableCell className="font-medium">
                   <div className="flex flex-col">
-                    <Link
+                    <a
                       href={`/playground/${project._id}`}
                       className="hover:underline"
                     >
                       <span className="font-semibold">{project.title}</span>
-                    </Link>
+                    </a>
                     <span className="text-sm text-gray-500 line-clamp-1">
                       {project.description}
                     </span>
@@ -209,7 +208,7 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className="bg-[#E93F3F15] text-[#E93F3F] border-[#E93F3F]"
+                    className="bg-accent text-accent-foreground border-border"
                   >
                     {project.template}
                   </Badge>
@@ -249,23 +248,23 @@ export default function ProjectTable({ projects }: ProjectTableProps) {
                         />
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link
+                        <a
                           href={`/playground/${project._id}`}
                           className="flex items-center"
                         >
                           <Eye className="h-4 w-4 mr-2" />
                           Open Project
-                        </Link>
+                        </a>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link
+                        <a
                           href={`/playground/${project._id}`}
                           target="_blank"
                           className="flex items-center"
                         >
                           <ExternalLink className="h-4 w-4 mr-2" />
                           Open in New Tab
-                        </Link>
+                        </a>
                       </DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem

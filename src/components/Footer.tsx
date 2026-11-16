@@ -8,13 +8,12 @@ function Footer() {
   const pathname = usePathname();
 
   // Hide global footer when the user is inside the playground editor
-  if (pathname?.startsWith("/playground")) {
+  if (pathname === "/" || pathname?.startsWith("/playground") || pathname?.startsWith("/webcontainer/")) {
     return null;
   }
 
   return (
-    <footer className="relative border-t border-border mt-auto glass-panel border-l-0 border-r-0 border-b-0 rounded-none">
-      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-border to-transparent" />
+    <footer className="relative border-t border-border mt-auto surface-panel border-l-0 border-r-0 border-b-0 rounded-none">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">

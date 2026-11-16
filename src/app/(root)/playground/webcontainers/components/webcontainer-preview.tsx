@@ -3,42 +3,37 @@
 import { Loader2, AlertCircle, ExternalLink, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useRef } from "react";
+import { reloadPreview } from "@webcontainer/api/utils";
+import { openWebContainerPreview } from "../open-preview";
 
 interface WebContainerPreviewProps {
   serverUrl: string | null;
-  isLoading: boolean;
+  status: string;
   error: string | null;
-  templateData?: any;
-  writeFileSync?: (path: string, content: string) => Promise<void>;
-  forceResetup?: boolean;
+  onRetry: () => void;
 }
 
 export default function WebContainerPreview({
   serverUrl,
-  isLoading,
+  status,
   error,
+  onRetry,
 }: WebContainerPreviewProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const handleRefresh = () => {
-    if (iframeRef.current && serverUrl) {
-      setIsRefreshing(true);
-      iframeRef.current.src = serverUrl;
-      setTimeout(() => setIsRefreshing(false), 500);
+  const handleRefresh = async () => {
+    const iframe = iframeRef.current;
+    if (!iframe || !serverUrl) return;
+    setIsRefreshing(true);
+    try {
+      await reloadPreview(iframe);
+    } catch {
+      iframe.src = serverUrl;
+    } finally {
+      setIsRefreshing(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-3 bg-background text-muted-foreground">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-sm font-medium">
-          Starting WebContainer dev server...
-        </p>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -47,7 +42,8 @@ export default function WebContainerPreview({
         <p className="text-sm font-semibold text-red-600 mb-1">
           Failed to load preview
         </p>
-        <p className="text-xs text-muted-foreground max-w-md">{error}</p>
+        <p className="max-h-36 max-w-md overflow-auto whitespace-pre-wrap break-words text-xs text-muted-foreground">{error}</p>
+        <Button className="mt-4" size="sm" variant="outline" onClick={onRetry}>Retry preview</Button>
       </div>
     );
   }
@@ -56,7 +52,7 @@ export default function WebContainerPreview({
     return (
       <div className="flex flex-col items-center justify-center h-full gap-2 text-muted-foreground bg-background">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/60" />
-        <p className="text-sm">Waiting for server ready event...</p>
+        <p className="text-sm" role="status">{status}</p>
       </div>
     );
   }
@@ -64,7 +60,7 @@ export default function WebContainerPreview({
   return (
     <div className="flex flex-col w-full h-full bg-background border-l">
       {/* 🌐 Live Server Address Bar Header */}
-      <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/40 gap-2 text-xs">
+      <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted gap-2 text-xs">
         <div className="flex-1 truncate bg-background border rounded px-2.5 py-1 text-muted-foreground select-all font-mono">
           {serverUrl}
         </div>
@@ -87,7 +83,7 @@ export default function WebContainerPreview({
           size="sm"
           variant="outline"
           className="h-7 px-2.5 gap-1.5 shrink-0"
-          onClick={() => window.open(serverUrl, "_blank")}
+          onClick={() => openWebContainerPreview(serverUrl)}
           title="Open preview in new tab"
         >
           <span>Open Live</span>

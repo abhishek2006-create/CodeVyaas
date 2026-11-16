@@ -48,7 +48,7 @@ function Comments({ snippetId }: { snippetId: Id<"snippets"> }) {
   };
 
   return (
-    <div className="glass-panel border border-border rounded-2xl overflow-hidden bg-card/50 text-card-foreground transition-colors duration-200">
+    <div className="surface-panel border border-border rounded-2xl overflow-hidden bg-card text-card-foreground transition-colors duration-200">
       <div className="px-6 sm:px-8 py-6 border-b border-border flex items-center justify-between">
         <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
           <MessageSquare className="w-5 h-5 text-primary" />
@@ -63,7 +63,7 @@ function Comments({ snippetId }: { snippetId: Id<"snippets"> }) {
             isSubmitting={isSubmitting}
           />
         ) : (
-          <div className="bg-muted/30 rounded-xl p-6 text-center mb-8 border border-border">
+          <div className="bg-muted rounded-xl p-6 text-center mb-8 border border-border">
             <p className="text-muted-foreground mb-4">
               Sign in to join the discussion
             </p>

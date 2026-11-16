@@ -21,7 +21,6 @@ import WebContainerService from "../service/webContainerService";
 interface TerminalProps {
   webcontainerUrl?: string;
   className?: string;
-  theme?: "dark" | "light";
   webContainerInstance?: any;
 }
 
@@ -32,7 +31,7 @@ export interface TerminalRef {
 }
 
 const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
-  ({ className, theme = "dark" }, ref) => {
+  ({ className }, ref) => {
     const shellStarted = useRef(false);
     const terminalRef = useRef<HTMLDivElement>(null);
     const term = useRef<Terminal | null>(null);
@@ -43,53 +42,15 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
     const [showSearch, setShowSearch] = useState(false);
     const shellProcess = useRef<any>(null);
 
-    const terminalThemes = {
-      dark: {
-        background: "#09090B",
-        foreground: "#FAFAFA",
-        cursor: "#FAFAFA",
-        cursorAccent: "#09090B",
-        selection: "#27272A",
-        black: "#18181B",
-        red: "#EF4444",
-        green: "#22C55E",
-        yellow: "#EAB308",
-        blue: "#3B82F6",
-        magenta: "#A855F7",
-        cyan: "#06B6D4",
-        white: "#F4F4F5",
-        brightBlack: "#3F3F46",
-        brightRed: "#F87171",
-        brightGreen: "#4ADE80",
-        brightYellow: "#FDE047",
-        brightBlue: "#60A5FA",
-        brightMagenta: "#C084FC",
-        brightCyan: "#22D3EE",
-        brightWhite: "#FFFFFF",
-      },
-      light: {
-        background: "#FFFFFF",
-        foreground: "#18181B",
-        cursor: "#18181B",
-        cursorAccent: "#FFFFFF",
-        selection: "#E4E4E7",
-        black: "#18181B",
-        red: "#DC2626",
-        green: "#16A34A",
-        yellow: "#CA8A04",
-        blue: "#2563EB",
-        magenta: "#9333EA",
-        cyan: "#0891B2",
-        white: "#F4F4F5",
-        brightBlack: "#71717A",
-        brightRed: "#EF4444",
-        brightGreen: "#22C55E",
-        brightYellow: "#EAB308",
-        brightBlue: "#3B82F6",
-        brightMagenta: "#A855F7",
-        brightCyan: "#06B6D4",
-        brightWhite: "#FAFAFA",
-      },
+    const terminalTheme = {
+      background: "#190d20",
+      foreground: "#fff1ff",
+      cursor: "#f887ff",
+      cursorAccent: "#29132e",
+      selectionBackground: "#733467",
+      red: "#ff7596",
+      magenta: "#f887ff",
+      brightMagenta: "#ffd0ff",
     };
 
     const clearTerminal = useCallback(() => {
@@ -115,7 +76,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
         fontSize: 14,
         lineHeight: 1.2,
         letterSpacing: 0,
-        theme: terminalThemes[theme],
+        theme: terminalTheme,
         allowTransparency: false,
         convertEol: true,
         scrollback: 5000,
@@ -145,7 +106,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
       terminal.writeln("WebContainer Terminal");
 
       return terminal;
-    }, [theme]);
+    }, []);
 
     useImperativeHandle(ref, () => ({
       writeToTerminal: (data: string) => {
@@ -321,7 +282,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
           className,
         )}
       >
-        <div className="flex items-center justify-between px-3 py-2 border-b bg-muted/50">
+        <div className="flex items-center justify-between px-3 py-2 border-b bg-muted">
           <div className="flex items-center gap-2">
             <div className="flex gap-1">
               <div className="w-3 h-3 rounded-full bg-red-500"></div>
@@ -395,7 +356,7 @@ const TerminalComponent = forwardRef<TerminalRef, TerminalProps>(
             ref={terminalRef}
             className="absolute inset-0 p-2"
             style={{
-              background: terminalThemes[theme].background,
+              background: terminalTheme.background,
             }}
           />
         </div>

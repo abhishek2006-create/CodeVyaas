@@ -37,8 +37,7 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
       label: "Code Executions",
       value: userStats?.totalExecutions ?? 0,
       icon: Activity,
-      color: "from-blue-500 to-cyan-500",
-      gradient: "group-hover:via-blue-400",
+      color: "bg-secondary text-primary",
       description: "Total code runs",
       metric: {
         label: "Last 24h",
@@ -50,8 +49,7 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
       label: "Starred Snippets",
       value: starredSnippets?.length ?? 0,
       icon: Star,
-      color: "from-yellow-500 to-orange-500",
-      gradient: "group-hover:via-yellow-400",
+      color: "bg-accent text-accent-foreground",
       description: "Saved for later",
       metric: {
         label: "Most starred",
@@ -63,8 +61,7 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
       label: "Languages Used",
       value: userStats?.languagesCount ?? 0,
       icon: Code2,
-      color: "from-purple-500 to-pink-500",
-      gradient: "group-hover:via-purple-400",
+      color: "bg-muted text-primary",
       description: "Different languages",
       metric: {
         label: "Most used",
@@ -76,15 +73,11 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
 
   return (
     <div
-      className="relative mb-8 glass-panel rounded-2xl p-8 transition-all duration-300"
+      className="relative mb-8 surface-panel rounded-2xl p-8 transition-all duration-300"
     >
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:32px] pointer-events-none" />
       <div className="relative flex items-center gap-8">
         <div className="relative group">
-          <div
-            className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full 
-          blur-xl opacity-50 group-hover:opacity-75 transition-opacity"
-          />
           <img
             src={user.imageUrl}
             alt="Profile"
@@ -92,10 +85,10 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
           />
           {userData.isPro && (
             <div
-              className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-purple-600 p-2
+              className="absolute -top-2 -right-2 bg-secondary p-2
              rounded-full z-20 shadow-lg animate-pulse"
             >
-              <Zap className="w-4 h-4 text-primary-foreground" />
+              <Zap className="w-4 h-4 text-primary" />
             </div>
           )}
         </div>
@@ -103,7 +96,7 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-3xl font-bold text-foreground">{userData.name}</h1>
             {userData.isPro && (
-              <span className="px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-sm font-medium">
+              <span className="px-3 py-1 bg-accent text-accent-foreground rounded-full text-sm font-medium">
                 Pro Member
               </span>
             )}
@@ -123,13 +116,8 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
             key={index}
-            className="group relative glass-card rounded-2xl overflow-hidden"
+            className="group relative surface-card rounded-2xl overflow-hidden"
           >
-            {/* Glow effect */}
-            <div
-              className={`absolute inset-0 bg-gradient-to-r ${stat.color} opacity-0 group-hover:opacity-10 transition-all 
-              duration-500 ${stat.gradient}`}
-            />
 
             {/* Content */}
             <div className="relative p-6">
@@ -143,8 +131,8 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
                   </h3>
                   <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
                 </div>
-                <div className={`p-3 rounded-xl bg-gradient-to-br ${stat.color} bg-opacity-10`}>
-                  <stat.icon className="w-5 h-5 text-primary-foreground" />
+                <div className={`p-3 rounded-xl ${stat.color}`}>
+                  <stat.icon className="size-5" />
                 </div>
               </div>
 
@@ -157,7 +145,6 @@ function ProfileHeader({ userStats, userData, user }: ProfileHeaderProps) {
             </div>
 
             {/* Interactive hover effect */}
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full duration-1000 transition-transform" />
           </motion.div>
         ))}
       </div>

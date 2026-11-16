@@ -35,7 +35,7 @@ export function StatusBar({
   lastSaved,
 }: StatusBarProps) {
   return (
-    <div className="h-6 bg-muted/50 border-t flex items-center justify-between px-4 text-xs">
+    <div className="h-6 bg-muted border-t flex items-center justify-between px-4 text-xs">
       <div className="flex items-center gap-4">
         {/* Connection Status */}
         <div className="flex items-center gap-1">
@@ -73,7 +73,7 @@ export function StatusBar({
         {/* Auto Save Status */}
         {autoSaveEnabled && (
           <>
-            <div className="flex items-center gap-1 text-blue-600">
+            <div className="flex items-center gap-1 text-primary">
               <Zap className="h-3 w-3" />
               <span>Auto Save</span>
             </div>

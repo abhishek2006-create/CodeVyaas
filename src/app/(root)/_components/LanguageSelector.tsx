@@ -45,17 +45,17 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         onClick={() => setIsOpen(!isOpen)}
-        className={`group relative flex items-center gap-3 px-4 py-2.5 bg-muted/20 rounded-lg transition-all duration-200 border border-border hover:border-primary/50
+        className={`group relative flex items-center gap-3 px-4 py-2.5 bg-muted rounded-lg transition-all duration-200 border border-border hover:border-primary/50
        ${!hasAccess && language !== "javascript" ? "opacity-50 cursor-not-allowed" : ""}`}
       >
         {/* Decoration */}
         <div
-          className="absolute inset-0 bg-primary/5 
+          className="absolute inset-0 bg-secondary
         rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
           aria-hidden="true"
         />
 
-        <div className="size-6 rounded-md bg-muted/40 p-0.5 group-hover:scale-110 transition-transform">
+        <div className="size-6 rounded-md bg-muted p-0.5 group-hover:scale-110 transition-transform">
           <Image
             src={currentLanguageObj.logoPath}
             alt="programming language logo"
@@ -82,7 +82,7 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.96 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 w-64 bg-[color-mix(in_srgb,var(--popover)_80%,transparent)] backdrop-blur-md rounded-xl border border-border shadow-2xl py-2 z-50"
+            className="absolute top-full left-0 mt-2 w-64 bg-popover rounded-xl border border-border shadow-2xl py-2 z-50"
           >
             <div className="px-3 pb-2 mb-2 border-b border-border">
               <p className="text-xs font-medium text-muted-foreground">
@@ -107,7 +107,7 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
                       variant="ghost"
                       className={`
                         relative w-full h-auto justify-start items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200
-                        ${isSelected ? "bg-primary/10 text-primary hover:bg-primary/15" : "text-muted-foreground hover:bg-muted/40"}
+                        ${isSelected ? "bg-secondary text-primary hover:bg-secondary" : "text-muted-foreground hover:bg-muted"}
                         ${isLocked ? "opacity-50 cursor-not-allowed" : ""}
                       `}
                       onClick={() => handleLanguageSelect(lang.id)}
@@ -116,7 +116,7 @@ function LanguageSelector({ hasAccess }: { hasAccess: boolean }) {
                       <div
                         className={`
                           relative size-8 rounded-lg p-1.5 shrink-0 group-hover:scale-105 transition-transform
-                          ${isSelected ? "bg-primary/20" : "bg-muted/40"}
+                          ${isSelected ? "bg-secondary" : "bg-muted"}
                         `}
                       >
                         <Image

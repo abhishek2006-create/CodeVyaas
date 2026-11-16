@@ -41,7 +41,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
           <div className="flex items-center gap-3">
             <div
               className="relative w-12 h-12 flex items-center justify-center rounded-full"
-              style={{ backgroundColor: "#61DAFB15" }}
+              style={{ backgroundColor: "var(--secondary)" }}
             >
               <Image
                 src={getTemplateIcon(project.template)}
@@ -59,7 +59,7 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
               <Badge
                 variant="outline"
-                className="bg-[#E93F3F15] text-[#E93F3F] border-[#E93F3F] mt-1"
+                className="bg-accent text-accent-foreground border-border mt-1"
               >
                 {project.template}
               </Badge>

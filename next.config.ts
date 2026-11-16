@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER } from "next/constants";
 
 const nextConfig: NextConfig = {
     eslint: {
@@ -31,7 +32,8 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/:path*",
+        // The homepage embeds a third-party viewer. The playground needs isolation for WebContainers.
+        source: "/:path(.+)",
         headers: [
           {
             key: "Cross-Origin-Embedder-Policy",
@@ -43,8 +45,21 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        // This bridge must keep its opener and load the StackBlitz connection frame.
+        source: "/webcontainer/connect/:path*",
+        headers: [
+          { key: "Cross-Origin-Embedder-Policy", value: "unsafe-none" },
+          { key: "Cross-Origin-Opener-Policy", value: "unsafe-none" },
+        ],
+      },
     ];
   },
 };
 
-export default nextConfig;
+export default function config(phase: string): NextConfig {
+  // Dev and production emit different Webpack runtimes and must not share chunks.
+  return phase === PHASE_DEVELOPMENT_SERVER
+    ? { ...nextConfig, distDir: ".next-dev" }
+    : nextConfig;
+}

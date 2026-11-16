@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from "react";
 import * as monaco from "monaco-editor";
 import { loader } from "@monaco-editor/react";
 import { cn } from "@/lib/utils";
-import { useWebsiteTheme } from "@/components/providers/WebsiteThemeProvider";
 import {
   configureMonaco,
   defaultEditorOptions,
@@ -32,11 +31,12 @@ export function MonacoEditor({
   const editorRef = useRef<HTMLDivElement>(null);
   const [editorInstance, setEditorInstance] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const { websiteTheme, resolvedColorMode } = useWebsiteTheme();
 
   // Initialize editor
   useEffect(() => {
     if (!editorRef.current) return;
+
+    configureMonaco(monaco);
 
     // Use defaultEditorOptions for consistency
     const newEditor = monaco.editor.create(editorRef.current, {
@@ -47,22 +47,12 @@ export function MonacoEditor({
       readOnly,
     });
 
-    // Ensure Monaco is configured with our themes
-    configureMonaco(monaco as any);
-
     setEditorInstance(newEditor);
 
     return () => {
       newEditor.dispose();
     };
   }, [editorRef.current]);
-
-  // Update theme when website theme changes
-  useEffect(() => {
-    if (editorInstance) {
-      configureMonaco(monaco as any);
-    }
-  }, [websiteTheme, resolvedColorMode, editorInstance]);
 
   // Update content when it changes
   useEffect(() => {

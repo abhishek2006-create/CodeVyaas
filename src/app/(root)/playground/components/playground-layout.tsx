@@ -33,6 +33,7 @@ export function PlaygroundLayout() {
     error: playgroundError,
     isLoading: isPlaygroundLoading,
     templateData,
+    setTemplateData,
     activeFile,
     activeFileId,
     openFiles,
@@ -63,9 +64,8 @@ export function PlaygroundLayout() {
 
   // 3. Connect the terminal callback to useWebContainer hook
   const {
-    container,
     previewUrl,
-    isLoading: containerLoading,
+    status: containerStatus,
     error: containerError,
     writeFile: writeFileSync,
   } = useWebContainer({
@@ -119,7 +119,7 @@ export function PlaygroundLayout() {
             {openFiles.length > 0 ? (
               <div className="h-full flex flex-col">
                 {/* File Tabs */}
-                <div className="border-b bg-muted/30">
+                <div className="border-b bg-muted">
                   <Tabs
                     value={activeFileId || ""}
                     onValueChange={setActiveFileId}
@@ -203,9 +203,7 @@ export function PlaygroundLayout() {
                             <ResizableHandle withHandle />
                             <ResizablePanel defaultSize={50} minSize={30}>
                               <WebContainerPreview
-                                templateData={templateData as any}
-                                writeFileSync={writeFileSync}
-                                isLoading={containerLoading}
+                                status={containerStatus}
                                 error={containerError}
                                 serverUrl={previewUrl}
                                 forceResetup={false}
@@ -234,7 +232,7 @@ export function PlaygroundLayout() {
                 </div>
               </div>
             ) : (
-              <div className="flex flex-col h-full items-center justify-center text-muted-foreground gap-4 bg-muted/5">
+              <div className="flex flex-col h-full items-center justify-center text-muted-foreground gap-4 bg-muted">
                 <FileText className="h-16 w-16 text-muted-foreground/20" />
                 <div className="text-center">
                   <p className="text-lg font-medium">No files open</p>

@@ -46,7 +46,7 @@ export function useWebContainer({
   );
   const [isLoading, setIsLoading] = useState<boolean>(!previewUrl);
   const [error, setError] = useState<string | null>(null);
-  const [setupStatus, setSetupStatus] = useState<string>("idle");
+  const hasTemplate = templateData !== null;
 
   const isInitializing = useRef(false);
   const watcherCleanupRef = useRef<(() => void) | null>(null);
@@ -119,9 +119,8 @@ export function useWebContainer({
     let isMounted = true;
     isInitializing.current = true;
 
-    async function initializeContainer() {
+    async function start() {
       try {
-        setIsLoading(true);
         setError(null);
         setSetupStatus("mounting");
 
@@ -157,6 +156,7 @@ export function useWebContainer({
             }
           }, 800);
         });
+        closeWatcher = () => watcher.close();
 
         watcherCleanupRef.current = () => {
           watcher.close();
@@ -214,14 +214,7 @@ export function useWebContainer({
           )
           .catch(() => {});
       } catch (err) {
-        console.error("WebContainer Error:", err);
-        if (isMounted) {
-          setError(err instanceof Error ? err.message : String(err));
-          setSetupStatus("error");
-          setIsLoading(false);
-        }
-      } finally {
-        isInitializing.current = false;
+        fail(err instanceof Error ? err.message : String(err));
       }
     }
 
@@ -249,13 +242,10 @@ export function useWebContainer({
   }, []);
 
   return {
-    container,
     previewUrl,
-    isLoading,
+    status,
     error,
     setupStatus,
     writeFile,
   };
 }
-
-export default useWebContainer;

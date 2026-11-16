@@ -1,22 +1,18 @@
 import { WebContainer } from "@webcontainer/api";
-import type { FileSystemTree } from "@webcontainer/api";
 
 class WebContainerService {
   private static instance: WebContainer | null = null;
   private static bootPromise: Promise<WebContainer> | null = null;
-  private static previewUrl: string | null = null;
-  private static serverReadyCallbacks: Array<
-    (port: number, url: string) => void
-  > = [];
-
   public static async getInstance(): Promise<WebContainer> {
     if (this.instance) {
       return this.instance;
     }
 
     if (!this.bootPromise) {
-      this.bootPromise = (async () => {
-        const container = await WebContainer.boot();
+      if (!window.crossOriginIsolated) {
+        throw new Error("The playground needs a secure, isolated tab. Reopen the project from Development.");
+      }
+      this.bootPromise = WebContainer.boot({ coep: "require-corp" }).then((container) => {
         this.instance = container;
 
         container.on("server-ready", (port, url) => {
@@ -28,7 +24,10 @@ class WebContainerService {
         });
 
         return container;
-      })();
+      }).catch((error: unknown) => {
+        this.bootPromise = null;
+        throw error;
+      });
     }
 
     return this.bootPromise;

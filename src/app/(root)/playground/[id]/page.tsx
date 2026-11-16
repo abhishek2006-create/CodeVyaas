@@ -15,7 +15,7 @@ const MainPlaygroundPage: React.FC = () => {
   return (
     // Use h-screen (or h-dvh) with overflow-hidden
     <div className="flex flex-col min-h-screen min-w-screen overflow-hidden">
-      <PlaygroundProvider id={id}>
+      <PlaygroundProvider key={id} id={id}>
         <NavigationHeader />
         {/* Fill ONLY remaining vertical space below the header */}
         <div className="flex-1 min-h-0 relative overflow-hidden">

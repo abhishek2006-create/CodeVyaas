@@ -50,7 +50,7 @@ function SnippetsPage() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-sm text-muted-foreground mb-6"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary text-sm text-muted-foreground mb-6"
           >
             <BookOpen className="w-4 h-4" />
             Community Code Library
@@ -59,7 +59,7 @@ function SnippetsPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-5xl font-bold bg-[linear-gradient(to_right,var(--content-color),var(--primary))] text-transparent bg-clip-text mb-6"
+            className="text-4xl md:text-5xl font-bold text-primary mb-6"
           >
             Discover & Share Code Snippets
           </motion.h1>
@@ -77,7 +77,7 @@ function SnippetsPage() {
         <div className="relative max-w-5xl mx-auto mb-12 space-y-6">
           {/* Search */}
           <div className="relative group">
-            <div className="absolute inset-0 bg-primary/20 rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
+            <div className="absolute inset-0 bg-secondary rounded-xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-500" />
             <div className="relative flex items-center">
               <Search className="absolute left-4 w-5 h-5 text-muted-foreground" />
               <input
@@ -85,7 +85,7 @@ function SnippetsPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search snippets by title, language, or author..."
-                className="w-full pl-12 pr-4 py-4 glass-panel text-foreground
+                className="w-full pl-12 pr-4 py-4 surface-panel text-foreground
                   rounded-xl transition-all duration-200
                   placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
               />
@@ -94,7 +94,7 @@ function SnippetsPage() {
 
           {/* Filters Bar */}
           <div className="flex flex-wrap items-center gap-4">
-            <div className="flex items-center gap-2 px-4 py-2 glass-panel rounded-lg">
+            <div className="flex items-center gap-2 px-4 py-2 surface-panel rounded-lg">
               <Tag className="w-4 h-4 text-muted-foreground" />
               <span className="text-sm text-muted-foreground">Languages:</span>
             </div>
@@ -104,10 +104,10 @@ function SnippetsPage() {
                 key={lang}
                 onClick={() => setSelectedLanguage(lang === selectedLanguage ? null : lang)}
                 className={`
-                    group relative px-3 py-1.5 rounded-lg transition-all duration-200 glass-button
+                    group relative px-3 py-1.5 rounded-lg transition-all duration-200 surface-button
                     ${
                       selectedLanguage === lang
-                        ? "text-primary bg-primary/10 ring-2 ring-primary/50"
+                        ? "text-primary bg-secondary ring-2 ring-primary/50"
                         : "text-muted-foreground hover:text-foreground"
                     }
                   `}
@@ -135,13 +135,13 @@ function SnippetsPage() {
               </span>
 
               {/* View Toggle */}
-              <div className="flex items-center gap-1 p-1 glass-panel rounded-lg">
+              <div className="flex items-center gap-1 p-1 surface-panel rounded-lg">
                 <button
                   onClick={() => setView("grid")}
                   className={`p-2 rounded-md transition-all ${
                     view === "grid"
-                      ? "bg-primary/20 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                      ? "bg-secondary text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
                   <Grid className="w-4 h-4" />
@@ -150,8 +150,8 @@ function SnippetsPage() {
                   onClick={() => setView("list")}
                   className={`p-2 rounded-md transition-all ${
                     view === "list"
-                      ? "bg-primary/20 text-primary"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted/20"
+                      ? "bg-secondary text-primary"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
                   }`}
                 >
                   <Layers className="w-4 h-4" />
@@ -186,8 +186,7 @@ function SnippetsPage() {
           >
             <div className="text-center">
               <div
-                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br 
-                from-blue-500/10 to-purple-500/10 ring-1 ring-white/10 mb-6"
+                className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-secondary ring-1 ring-white/10 mb-6"
               >
                 <Code className="w-8 h-8 text-gray-400" />
               </div>
@@ -204,7 +203,7 @@ function SnippetsPage() {
                     setSearchQuery("");
                     setSelectedLanguage(null);
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-muted/50 text-muted-foreground hover:text-foreground rounded-lg 
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-muted text-muted-foreground hover:text-foreground rounded-lg
                     transition-colors border border-border"
                 >
                   <X className="w-4 h-4" />

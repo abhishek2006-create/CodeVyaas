@@ -31,8 +31,8 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="glass-panel rounded-xl p-6 w-full max-w-md shadow-2xl">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+      <div className="surface-panel rounded-xl p-6 w-full max-w-md shadow-2xl">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-foreground">
             Share Snippet
@@ -58,7 +58,7 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="glass-input w-full px-3 py-2 rounded-lg text-foreground placeholder:text-muted-foreground/50"
+              className="surface-input w-full px-3 py-2 rounded-lg text-foreground placeholder:text-muted-foreground/50"
               placeholder="Enter snippet title"
               required
             />
@@ -75,7 +75,7 @@ function ShareSnippetDialog({ onClose }: { onClose: () => void }) {
             <button
               type="submit"
               disabled={isSharing}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 
+              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90
               disabled:opacity-50 transition-all font-medium"
             >
               {isSharing ? "Sharing..." : "Share"}

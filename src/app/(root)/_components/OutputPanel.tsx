@@ -26,12 +26,12 @@ function OutputPanel() {
   };
 
   return (
-    <div className="relative glass-panel rounded-xl p-4 transition-all duration-300">
+    <div className="relative surface-panel rounded-xl p-4 transition-all duration-300">
       {/* Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-primary/10 ring-1 ring-border">
-            <Terminal className="w-4 h-4 text-blue-400" />
+          <div className="flex items-center justify-center w-6 h-6 rounded-lg bg-secondary ring-1 ring-border">
+            <Terminal className="w-4 h-4 text-primary" />
           </div>
           <span className="text-sm font-medium text-foreground">Output</span>
         </div>
@@ -39,7 +39,7 @@ function OutputPanel() {
         {hasContent && (
           <button
             onClick={handleCopy}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground bg-muted/20 
+            className="flex items-center gap-1.5 px-2.5 py-1.5 text-xs text-muted-foreground hover:text-foreground bg-muted
             rounded-lg ring-1 ring-border hover:ring-primary/50 transition-all"
           >
             {isCopied ? (
@@ -60,7 +60,7 @@ function OutputPanel() {
       {/* Output Area */}
       <div className="relative">
         <div
-          className="relative bg-black/5 dark:bg-black/20 backdrop-blur-sm border border-border 
+          className="relative bg-background border border-border
         rounded-xl p-4 h-[600px] overflow-auto font-mono text-sm"
         >
           {isRunning ? (
@@ -87,7 +87,7 @@ function OutputPanel() {
             </div>
           ) : (
             <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted/20 ring-1 ring-border mb-4">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-muted ring-1 ring-border mb-4">
                 <Clock className="w-6 h-6" />
               </div>
               <p className="text-center">

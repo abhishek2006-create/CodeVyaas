@@ -63,34 +63,34 @@ export const configureMonaco = (monaco: Monaco) => {
       // Comments
       {
         token: "comment",
-        foreground: getMonacoColor("--editor-comment"),
+        foreground: getMonacoColor("--editor-comment").slice(1),
         fontStyle: "italic",
       },
       {
         token: "comment.line",
-        foreground: getMonacoColor("--editor-comment"),
+        foreground: getMonacoColor("--editor-comment").slice(1),
         fontStyle: "italic",
       },
       {
         token: "comment.block",
-        foreground: getMonacoColor("--editor-comment"),
+        foreground: getMonacoColor("--editor-comment").slice(1),
         fontStyle: "italic",
       },
 
       // Keywords
       {
         token: "keyword",
-        foreground: getMonacoColor("--editor-keyword"),
+        foreground: getMonacoColor("--editor-keyword").slice(1),
         fontStyle: "bold",
       },
       {
         token: "keyword.control",
-        foreground: getMonacoColor("--editor-keyword"),
+        foreground: getMonacoColor("--editor-keyword").slice(1),
         fontStyle: "bold",
       },
       {
         token: "keyword.operator",
-        foreground: getMonacoColor("--editor-operator"),
+        foreground: getMonacoColor("--editor-operator").slice(1),
       },
 
       // Strings
@@ -98,7 +98,7 @@ export const configureMonaco = (monaco: Monaco) => {
       { token: "string.quoted", foreground: getMonacoColor("--editor-string") },
       {
         token: "string.template",
-        foreground: getMonacoColor("--editor-string"),
+        foreground: getMonacoColor("--editor-string").slice(1),
       },
 
       // Numbers
@@ -109,28 +109,28 @@ export const configureMonaco = (monaco: Monaco) => {
       // Functions
       {
         token: "entity.name.function",
-        foreground: getMonacoColor("--editor-function"),
+        foreground: getMonacoColor("--editor-function").slice(1),
       },
       {
         token: "support.function",
-        foreground: getMonacoColor("--editor-function"),
+        foreground: getMonacoColor("--editor-function").slice(1),
       },
 
       // Variables
       { token: "variable", foreground: getMonacoColor("--editor-variable") },
       {
         token: "variable.parameter",
-        foreground: getMonacoColor("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable").slice(1),
       },
       {
         token: "variable.other",
-        foreground: getMonacoColor("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable").slice(1),
       },
 
       // Types
       {
         token: "entity.name.type",
-        foreground: getMonacoColor("--editor-type"),
+        foreground: getMonacoColor("--editor-type").slice(1),
       },
       { token: "support.type", foreground: getMonacoColor("--editor-type") },
       { token: "storage.type", foreground: getMonacoColor("--editor-keyword") },
@@ -138,7 +138,7 @@ export const configureMonaco = (monaco: Monaco) => {
       // Classes
       {
         token: "entity.name.class",
-        foreground: getMonacoColor("--editor-class"),
+        foreground: getMonacoColor("--editor-class").slice(1),
       },
       { token: "support.class", foreground: getMonacoColor("--editor-class") },
 
@@ -146,21 +146,21 @@ export const configureMonaco = (monaco: Monaco) => {
       { token: "constant", foreground: getMonacoColor("--editor-variable") },
       {
         token: "constant.language",
-        foreground: getMonacoColor("--editor-keyword"),
+        foreground: getMonacoColor("--editor-keyword").slice(1),
       },
       {
         token: "constant.numeric",
-        foreground: getMonacoColor("--editor-number"),
+        foreground: getMonacoColor("--editor-number").slice(1),
       },
 
       // Operators
       {
         token: "keyword.operator",
-        foreground: getMonacoColor("--editor-operator"),
+        foreground: getMonacoColor("--editor-operator").slice(1),
       },
       {
         token: "punctuation",
-        foreground: getMonacoColor("--editor-foreground"),
+        foreground: getMonacoColor("--editor-foreground").slice(1),
       },
 
       // HTML/XML
@@ -169,29 +169,29 @@ export const configureMonaco = (monaco: Monaco) => {
       { token: "tag.class", foreground: getMonacoColor("--editor-type") },
       {
         token: "attribute.name",
-        foreground: getMonacoColor("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable").slice(1),
       },
       {
         token: "attribute.value",
-        foreground: getMonacoColor("--editor-string"),
+        foreground: getMonacoColor("--editor-string").slice(1),
       },
 
       // CSS
       {
         token: "attribute.name.css",
-        foreground: getMonacoColor("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable").slice(1),
       },
       {
         token: "attribute.value.css",
-        foreground: getMonacoColor("--editor-string"),
+        foreground: getMonacoColor("--editor-string").slice(1),
       },
       {
         token: "property-name.css",
-        foreground: getMonacoColor("--editor-variable"),
+        foreground: getMonacoColor("--editor-variable").slice(1),
       },
       {
         token: "property-value.css",
-        foreground: getMonacoColor("--editor-string"),
+        foreground: getMonacoColor("--editor-string").slice(1),
       },
 
       // JSON
@@ -295,9 +295,6 @@ export const configureMonaco = (monaco: Monaco) => {
       "panel.border": getMonacoColor("--border"),
     },
   });
-
-  // Set the theme
-  monaco.editor.setTheme("modern-theme");
 
   // Configure additional editor settings
   monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
