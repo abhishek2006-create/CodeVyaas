@@ -1,4 +1,3 @@
-// service/webContainerService.ts
 import { WebContainer } from "@webcontainer/api";
 
 class WebContainerService {
@@ -15,6 +14,15 @@ class WebContainerService {
       }
       this.bootPromise = WebContainer.boot({ coep: "require-corp" }).then((container) => {
         this.instance = container;
+
+        container.on("server-ready", (port, url) => {
+          console.log(
+            `[WebContainerService] Server ready at port ${port}: ${url}`,
+          );
+          this.previewUrl = url;
+          this.serverReadyCallbacks.forEach((cb) => cb(port, url));
+        });
+
         return container;
       }).catch((error: unknown) => {
         this.bootPromise = null;
@@ -25,23 +33,28 @@ class WebContainerService {
     return this.bootPromise;
   }
 
-  public static async readdir(dirPath: string = ""): Promise<string[]> {
-    if (!this.instance) return [];
-    const cleanPath = dirPath.replace(/^\/+/, "");
-    try {
-      const entries = await this.instance.fs.readdir(cleanPath, {
-        withFileTypes: true,
-      });
-      return entries
-        .filter(
-          (entry) =>
-            entry.name !== "node_modules" && !entry.name.startsWith("."),
-        )
-        .map((entry) => entry.name);
-    } catch (err) {
-      console.error("Failed to read directory from WebContainer:", err);
-      return [];
+  public static async setup(files: FileSystemTree): Promise<WebContainer> {
+    const container = await this.getInstance();
+    await container.mount(files);
+    return container;
+  }
+
+  public static getPreviewUrl(): string | null {
+    return this.previewUrl;
+  }
+
+  public static onServerReady(
+    callback: (port: number, url: string) => void,
+  ): () => void {
+    this.serverReadyCallbacks.push(callback);
+    if (this.previewUrl) {
+      callback(5173, this.previewUrl);
     }
+    return () => {
+      this.serverReadyCallbacks = this.serverReadyCallbacks.filter(
+        (cb) => cb !== callback,
+      );
+    };
   }
 
   public static async writeFile(
@@ -51,18 +64,6 @@ class WebContainerService {
     if (!this.instance) return;
     const cleanPath = filePath.replace(/^\/+/, "");
     await this.instance.fs.writeFile(cleanPath, content);
-  }
-
-  public static async mkdir(dirPath: string): Promise<void> {
-    if (!this.instance) return;
-    const cleanPath = dirPath.replace(/^\/+/, "");
-    await this.instance.fs.mkdir(cleanPath, { recursive: true });
-  }
-
-  public static async rm(targetPath: string): Promise<void> {
-    if (!this.instance) return;
-    const cleanPath = targetPath.replace(/^\/+/, "");
-    await this.instance.fs.rm(cleanPath, { recursive: true, force: true });
   }
 }
 

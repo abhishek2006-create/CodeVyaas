@@ -1,175 +1,251 @@
-import { useEffect, useRef, useState } from "react";
-import type { WebContainer, WebContainerProcess } from "@webcontainer/api";
+"use client";
+
+import { useState, useEffect, useCallback, useRef } from "react";
+import { WebContainer, DirEnt } from "@webcontainer/api";
 import WebContainerService from "../service/webContainerService";
 import { transformToWebContainerFormat } from "./transformer";
-import type { TemplateFolder, TemplateItem } from "../../components/types";
+import type { TemplateFolder, TemplateFile } from "../../components/types";
+import { usePlayground } from "../../hooks/playground-context";
 
-const generatedDirectories = new Set(["node_modules", ".git", ".next", ".angular", "dist"]);
-
-async function readFiles(container: WebContainer, dir = ""): Promise<TemplateItem[]> {
-  const entries = await container.fs.readdir(dir || ".", { withFileTypes: true });
-  const items: TemplateItem[] = [];
-  for (const entry of entries) {
-    if (generatedDirectories.has(entry.name)) continue;
-    const path = dir ? `${dir}/${entry.name}` : entry.name;
-    if (entry.isDirectory()) {
-      items.push({ type: "folder", folderName: entry.name, path: dir, items: await readFiles(container, path) });
-    } else if (entry.isFile()) {
-      const dot = entry.name.lastIndexOf(".");
-      items.push({
-        type: "file",
-        filename: dot > 0 ? entry.name.slice(0, dot) : entry.name,
-        fileExtension: dot > 0 ? entry.name.slice(dot + 1) : "",
-        path: dir,
-        content: await container.fs.readFile(path, "utf-8"),
-      });
-    }
-  }
-  return items;
+export interface UseWebContainerOptions {
+  templateData: TemplateFolder | null;
+  autoStart?: boolean;
+  onTerminalData?: (data: string) => void;
 }
 
-function getStartArguments(scripts: Record<string, string>) {
-  const script = scripts.dev ? "dev" : scripts.start ? "start" : null;
-  if (!script) throw new Error("Add a dev or start script to package.json to run the preview.");
-  const command = scripts[script];
-  const args = ["run", script];
-  if (/^next\s+dev\b/.test(command)) args.push("--", "--hostname", "0.0.0.0");
-  if (/^ng\s+serve\b/.test(command) && !command.includes("--host")) args.push("--", "--host", "0.0.0.0");
-  if (/^vite(?:\s|$)/.test(command) && !command.includes("--host")) args.push("--", "--host", "0.0.0.0");
-  return args;
-}
+const TEMPLATE_RUN_COMMANDS: Record<string, { cmd: string; args: string[] }> = {
+  react: {
+    cmd: "npm",
+    args: ["run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"],
+  },
+  vue: {
+    cmd: "npm",
+    args: ["run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"],
+  },
+  express: { cmd: "npm", args: ["start"] },
+  hono: { cmd: "npm", args: ["run", "dev"] },
+  nextjs: {
+    cmd: "npm",
+    args: ["run", "dev", "--", "-h", "0.0.0.0", "-p", "5173"],
+  },
+  angular: {
+    cmd: "npm",
+    args: ["start", "--", "--host", "0.0.0.0", "--port", "5173"],
+  },
+};
 
-export function useWebContainer(
-  templateData: TemplateFolder | null,
-  onFilesChanged: (data: TemplateFolder) => void,
-) {
-  const latestTemplate = useRef(templateData);
-  latestTemplate.current = templateData;
-  const onFilesChangedRef = useRef(onFilesChanged);
-  onFilesChangedRef.current = onFilesChanged;
-  const [attempt, setAttempt] = useState(0);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [status, setStatus] = useState("Starting the browser runtime…");
+export function useWebContainer({
+  templateData,
+  autoStart = true,
+  onTerminalData,
+}: UseWebContainerOptions) {
+  const { setTemplateData } = usePlayground();
+  const [container, setContainer] = useState<WebContainer | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    WebContainerService.getPreviewUrl(),
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(!previewUrl);
   const [error, setError] = useState<string | null>(null);
   const hasTemplate = templateData !== null;
 
-  // File edits are synced through WebContainerService. Only a new project or
-  // an explicit retry should mount a template and start another server.
+  const isInitializing = useRef(false);
+  const watcherCleanupRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
-    const template = latestTemplate.current;
-    if (!hasTemplate || !template) return;
+    const unsubscribe = WebContainerService.onServerReady((_port, url) => {
+      setPreviewUrl(url);
+      setSetupStatus("ready");
+      setIsLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
-    let active = true;
-    let process: WebContainerProcess | undefined;
-    let unsubscribe: (() => void) | undefined;
-    let closeWatcher: (() => void) | undefined;
-    let debounce: ReturnType<typeof setTimeout> | undefined;
-    let timeout: ReturnType<typeof setTimeout>;
-    let output = "";
+  const readDirectoryRecursively = useCallback(
+    async (
+      instance: WebContainer,
+      dirPath: string = "",
+    ): Promise<(TemplateFile | TemplateFolder)[]> => {
+      const items: (TemplateFile | TemplateFolder)[] = [];
+      const entries = (await instance.fs.readdir(dirPath || ".", {
+        withFileTypes: true,
+      })) as DirEnt<string>[];
 
-    function stop() {
-      if (!active) return;
-      active = false;
-      clearTimeout(timeout);
-      clearTimeout(debounce);
-      unsubscribe?.();
-      closeWatcher?.();
-      process?.kill();
-    }
+      for (const entry of entries) {
+        if (entry.name.startsWith(".") || entry.name === "node_modules") {
+          continue;
+        }
 
-    function fail(message: string) {
-      if (!active) return;
-      stop();
-      setPreviewUrl(null);
-      setError(message);
-    }
+        const fullPath = dirPath ? `${dirPath}/${entry.name}` : entry.name;
 
-    function showStatus(message: string, timeoutMs: number) {
-      setStatus(message);
-      clearTimeout(timeout);
-      timeout = setTimeout(() => fail(`${message.replace(/…$/, "")} timed out. Retry the preview.`), timeoutMs);
-    }
+        if (entry.isDirectory()) {
+          const subItems = await readDirectoryRecursively(instance, fullPath);
+          items.push({
+            type: "folder",
+            folderName: entry.name,
+            path: dirPath,
+            items: subItems,
+          });
+        } else if (entry.isFile()) {
+          const lastDot = entry.name.lastIndexOf(".");
+          const filename =
+            lastDot > 0 ? entry.name.substring(0, lastDot) : entry.name;
+          const fileExtension =
+            lastDot > 0 ? entry.name.substring(lastDot + 1) : "";
 
-    function trackOutput(currentProcess: WebContainerProcess) {
-      output = "";
-      return currentProcess.output.pipeTo(new WritableStream<string>({
-        write(chunk) { output = (output + chunk).slice(-1200); },
-      })).catch(() => undefined);
-    }
+          let content = "";
+          try {
+            content = await instance.fs.readFile(fullPath, "utf-8");
+          } catch {
+            content = "";
+          }
+
+          items.push({
+            type: "file",
+            filename,
+            fileExtension,
+            content,
+            path: dirPath,
+          });
+        }
+      }
+      return items;
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (!templateData || isInitializing.current) return;
+
+    let isMounted = true;
+    isInitializing.current = true;
 
     async function start() {
       try {
         setError(null);
-        setPreviewUrl(null);
-        showStatus("Starting the browser runtime…", 60000);
-        const container = await WebContainerService.getInstance();
-        if (!active) return;
-        await container.mount(transformToWebContainerFormat(latestTemplate.current ?? template!));
-        if (!active) return;
+        setSetupStatus("mounting");
 
-        const manifest = JSON.parse(await container.fs.readFile("package.json", "utf-8"));
-        const args = getStartArguments(manifest.scripts ?? {});
-        if (!active) return;
-        showStatus("Installing project dependencies…", 120000);
-        const install = await container.spawn("npm", ["install"]);
-        if (!active) { install.kill(); return; }
-        process = install;
-        const installOutput = trackOutput(install);
-        const installCode = await install.exit;
-        if (!active) return;
-        if (installCode !== 0) {
-          await installOutput;
-          fail(output.trim() || `Dependency installation exited with code ${installCode}.`);
-          return;
+        const files = transformToWebContainerFormat(templateData!);
+        const instance = await WebContainerService.setup(files);
+
+        if (!isMounted) return;
+        setContainer(instance);
+
+        const initialItems = await readDirectoryRecursively(instance, "");
+        if (isMounted) {
+          setTemplateData({
+            type: "folder",
+            folderName: templateData?.folderName || "root",
+            path: "",
+            items: initialItems,
+          });
         }
 
-        showStatus("Starting the project server…", 60000);
-        unsubscribe = container.on("server-ready", (_port, url) => {
-          if (!active) return;
-          clearTimeout(timeout);
-          unsubscribe?.();
-          setPreviewUrl(url);
-        });
-        const server = await container.spawn("npm", args, {
-          env: { HOST: "0.0.0.0" },
-        });
-        if (!active) { server.kill(); return; }
-        process = server;
-        const serverOutput = trackOutput(server);
-
-        const watcher = container.fs.watch(".", { recursive: true }, (_event, filename) => {
-          if (!active || (typeof filename === "string" &&
-            filename.split("/").some((part) => generatedDirectories.has(part)))) return;
-          clearTimeout(debounce);
-          debounce = setTimeout(async () => {
-            try {
-              const items = await readFiles(container);
-              if (active) onFilesChangedRef.current({ ...template!, items });
-            } catch (err) {
-              console.warn("Could not refresh playground files:", err);
+        // File Watcher Setup
+        let watchDebounce: NodeJS.Timeout;
+        const watcher = instance.fs.watch("/", { recursive: true }, () => {
+          clearTimeout(watchDebounce);
+          watchDebounce = setTimeout(async () => {
+            if (isMounted) {
+              const updatedItems = await readDirectoryRecursively(instance, "");
+              setTemplateData({
+                type: "folder",
+                folderName: templateData?.folderName || "root",
+                path: "",
+                items: updatedItems,
+              });
             }
           }, 800);
         });
         closeWatcher = () => watcher.close();
 
-        const exitCode = await server.exit;
-        if (active) {
-          await serverOutput;
-          fail(output.trim() || `The project server exited with code ${exitCode}.`);
+        watcherCleanupRef.current = () => {
+          watcher.close();
+          clearTimeout(watchDebounce);
+        };
+
+        // Install dependencies
+        setSetupStatus("installing");
+        if (onTerminalData)
+          onTerminalData("\r\n📦 Installing dependencies...\r\n");
+
+        const installProcess = await instance.spawn("npm", [
+          "install",
+          "--no-audit",
+          "--no-fund",
+        ]);
+
+        installProcess.output.pipeTo(
+          new WritableStream({
+            write(data) {
+              if (onTerminalData) onTerminalData(data);
+            },
+          }),
+        );
+
+        const installExitCode = await installProcess.exit;
+        if (installExitCode !== 0) {
+          throw new Error(
+            `npm install failed with exit code ${installExitCode}`,
+          );
         }
+
+        // Run framework dev server via npm script
+        const templateKey = (templateData?.folderName || "react").toLowerCase();
+        const runConfig =
+          TEMPLATE_RUN_COMMANDS[templateKey] || TEMPLATE_RUN_COMMANDS.react;
+
+        setSetupStatus("starting");
+        if (onTerminalData)
+          onTerminalData(
+            `\r\n⚡ Starting ${templateKey.toUpperCase()} dev server...\r\n`,
+          );
+
+        const devProcess = await instance.spawn(runConfig.cmd, runConfig.args);
+
+        devProcess.output
+          .pipeTo(
+            new WritableStream({
+              write(data) {
+                if (onTerminalData) {
+                  onTerminalData(data);
+                }
+              },
+            }),
+          )
+          .catch(() => {});
       } catch (err) {
         fail(err instanceof Error ? err.message : String(err));
       }
     }
 
-    void start();
-    return stop;
-  }, [hasTemplate, attempt]);
+    if (autoStart) {
+      initializeContainer();
+    }
+
+    return () => {
+      isMounted = false;
+      if (watcherCleanupRef.current) {
+        watcherCleanupRef.current();
+        watcherCleanupRef.current = null;
+      }
+    };
+  }, [
+    templateData,
+    autoStart,
+    onTerminalData,
+    readDirectoryRecursively,
+    setTemplateData,
+  ]);
+
+  const writeFile = useCallback(async (path: string, content: string) => {
+    await WebContainerService.writeFile(path, content);
+  }, []);
 
   return {
     previewUrl,
     status,
     error,
-    retry: () => setAttempt((current) => current + 1),
+    setupStatus,
+    writeFile,
   };
 }

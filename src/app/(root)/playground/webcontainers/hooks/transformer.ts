@@ -1,33 +1,28 @@
-import { TemplateFolder, TemplateItem } from "../../components/types";
-
-import { FileSystemTree } from "@webcontainer/api";
+import type { FileSystemTree } from "@webcontainer/api";
+import type { TemplateFolder } from "../../components/types";
 
 export function transformToWebContainerFormat(
-  template: TemplateFolder,
+  folder: TemplateFolder,
 ): FileSystemTree {
-  function walk(items: TemplateItem[]): FileSystemTree {
-    const tree: FileSystemTree = {};
+  const tree: FileSystemTree = {};
 
-    for (const item of items) {
-      if (item.type === "file") {
-        const name = item.fileExtension
-          ? `${item.filename}.${item.fileExtension}`
-          : item.filename;
+  for (const item of folder.items) {
+    if (item.type === "file") {
+      const fileName = item.fileExtension
+        ? `${item.filename}.${item.fileExtension}`
+        : item.filename;
 
-        tree[name] = {
-          file: {
-            contents: item.content,
-          },
-        };
-      } else {
-        tree[item.folderName] = {
-          directory: walk(item.items),
-        };
-      }
+      tree[fileName] = {
+        file: {
+          contents: item.content || "",
+        },
+      };
+    } else if (item.type === "folder") {
+      tree[item.folderName] = {
+        directory: transformToWebContainerFormat(item),
+      };
     }
-
-    return tree;
   }
 
-  return walk(template.items);
+  return tree;
 }
